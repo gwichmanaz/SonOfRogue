@@ -1,5 +1,10 @@
 var Event = require('./Event.es6');
 module.exports = class Clock extends Event {
+	/**
+	 * resolution: number of milliseconds between ticks of the clock
+	 * eventName: event for clock to fire when it ticks
+	 * running: clock can be started and stopped like a football clock.
+	 */
 	constructor({resolution = 1000, eventName = "tick", running = false} = {}) {
 		super();
 		var count = 0;
