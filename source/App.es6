@@ -17,3 +17,8 @@ module.exports = { Clock, Event, RNG, Persist };
 if (typeof window != "undefined") {
 	window.App = module.exports;
 }
+
+const LevelGenerator = require('./class/LevelGenerator.es6');
+const level = LevelGenerator.generateLevel();
+
+console.log(level);
