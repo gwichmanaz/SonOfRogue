@@ -2,4 +2,3 @@
 package-lock.json
 persist.txt
 node_modules/*
-dist/*
