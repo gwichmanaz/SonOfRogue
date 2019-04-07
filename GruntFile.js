@@ -15,7 +15,18 @@ module.exports = (grunt) => {
 					]
 				}
 			}
+		},
+		copy: {
+		  main: {
+		    expand: true,
+		    src: 'source/asset/*',
+		    dest: 'dist/asset/',
+		  }
 		}
 	});
 	grunt.loadNpmTasks('grunt-browserify');
+	grunt.loadNpmTasks('grunt-contrib-copy');
+
+	grunt.registerTask('build', ['copy', 'browserify']);
+
 };
