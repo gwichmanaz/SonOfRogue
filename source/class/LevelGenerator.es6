@@ -2,21 +2,21 @@ const Level = require('./Level.es6');
 const Cell = require('./Cell.es6');
 
 const TEST_DATA = [
-	'                                                                  ',
-	'    wwwwwwwwwww                                                   ',
-	'    w.........wwwwwwwwwwwwwwwwwwwwwwww                            ',
-	'    w................................w                            ',
-	'    w.........wwwwwwwwwwwwwwwwwwwwww.w  wwwwwwwwwwwww             ',
-	'    wwwwwwwwwww                    w.w  w...........w             ',
-	'                                   w.wwww...........w             ',
-	'                                   w................w             ',
-	'                                   wwwwww...........w             ',
-	'                                        w...........w             ',
-	'                                        wwwwwwwwwwwww             ',
-	'                                                                  ',
-	'                                                                  ',
-	'                                                                  ',
-	'                                                                  ',
+	'                                                             ',
+	'    wwwwwwwwwww                                              ',
+	'    w.........wwwwwwwwwwwwwwwwwww                            ',
+	'    w...........................w                            ',
+	'    w.........wwwwwwwww.wwwwwww.w  wwwwwwwwwwwww             ',
+	'    wwwwwwwwwww       w.w     w.w  w...........w             ',
+	'                      w.w     w.wwww...........w             ',
+	'                      w.w     w................w             ',
+	'              wwwwwww w.w     wwwwww...........w             ',
+	'              w.....w w.w          w...........w             ',
+	'              w.....www.w          wwwwwwwwwwwww             ',
+	'              w.........w                                    ',
+	'              wwwwwwwwwww                                    ',
+	'                                                             ',
+	'                                                             ',
 ];
 
 const CHARACTERS = {

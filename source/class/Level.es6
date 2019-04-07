@@ -21,6 +21,13 @@ module.exports = class Level {
 		return this.cells[x][y];
 	}
 
+	getSize () {
+		return {
+			w: this.cells.length,
+			h: this.cells[0].length
+		}
+	}
+
 	getMonster (x, y) {
 		return this.monsters.find(m => m.x == x && m.y == y);
 	}
