@@ -1,5 +1,5 @@
-const Level = require('./Level.es6');
-const Cell = require('./Cell.es6');
+const Level = require('../class/Level.es6');
+const Cell = require('../class/Cell.es6');
 
 const TEST_DATA = [
 	'                                                             ',

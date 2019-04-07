@@ -6,7 +6,7 @@ var Clock = require('./class/Clock.es6');
 var Event = require('./class/Event.es6');
 var RNG = require('./class/RNG.es6');
 var Persist = require('./class/Persist.es6');
-const LevelGenerator = require('./class/LevelGenerator.es6');
+const LevelGenerator = require('./object/LevelGenerator.es6');
 const Display = require('./object/Display.es6');
 
 console.log("App.js setting module exports");
