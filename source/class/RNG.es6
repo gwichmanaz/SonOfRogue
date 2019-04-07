@@ -50,4 +50,23 @@ module.exports = class RNG {
 		}
 		return total;
 	}
+	/**
+	 * test how fair our dice are by rolling a bunch of times and seeing how close the results are to perfect
+	 * @sides the number of sides on our test die
+	 * @rolls the number of times to roll the test die
+	 * @return an array with a value for each result, showing how close to "perfect" we are (1.0 means exactly as expected)
+	 */
+	test(sides = 10, rolls = 10000) {
+		var results = [];
+		var result;
+		var perfect = 1 / sides;
+		var count = rolls;
+
+		while (count--) {
+			result = this.roll(sides);
+			results[result] = results[result] || 0;
+			results[result]++;
+		}
+		return results.map((n) => (n / rolls) / perfect);
+	}
 }
