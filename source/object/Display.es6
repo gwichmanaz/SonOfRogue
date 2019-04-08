@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-const PIXIUtils = require('./PixiUtils.es6');
+const LevelView = require('../class/widget/LevelView.es6');
 
 const SPRITES = [
 	{ id: 'wall', file: 'asset/dungeonSprites/Stone.png'},
@@ -9,6 +9,7 @@ const SPRITES = [
 
 module.exports = {
 	init() {
+		this.widgets = {};
 		this.app = new PIXI.Application({width: 800, height: 600});
 		document.body.appendChild(this.app.view);
 		return this.__loadSprites().then(() => this.__initUI());
@@ -22,21 +23,11 @@ module.exports = {
 	},
 
 	__initUI () {
-		this.levelMapContainer = new PIXI.Container();
-		this.app.stage.addChild(this.levelMapContainer);
+		this.widgets.levelView = new LevelView(this.app.stage);
+		
 	},
 
 	setLevel(level) {
-		// this.levelMapContainer.clear();
-		const {w, h} = level.getSize();
-		for (let x = 0; x < w; x++) {
-			for (let y = 0; y < h; y++) {
-				const cell = level.getCell(x, y);
-				const sprite = PIXIUtils.createSprite(cell.spriteId);
-				sprite.x = x * 16;
-				sprite.y = y * 16;
-				this.levelMapContainer.addChild(sprite);
-			}
-		}
+		this.widgets.levelView.setLevel(level);
 	}
 }
