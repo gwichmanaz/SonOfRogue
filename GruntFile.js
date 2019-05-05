@@ -17,11 +17,12 @@ module.exports = (grunt) => {
 			}
 		},
 		copy: {
-		  main: {
-		    expand: true,
-		    src: 'source/asset/*',
-		    dest: 'dist/asset/',
-		  }
+			main: {
+				expand: true,
+				cwd: 'source/asset/',
+				src: '**',
+				dest: 'dist/asset/',
+			}
 		}
 	});
 	grunt.loadNpmTasks('grunt-browserify');
