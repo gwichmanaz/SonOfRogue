@@ -2,6 +2,7 @@
  * Base class for any persistent object
  */
 {
+	let uuid = require('../lib/uuid.js');
 	/*
 	 * if we are not in a browser, get ourselves some local storage
 	 */
@@ -11,7 +12,7 @@
 	}
 	/*
 	 * Default persister.  Persister is a singleton that can save/restore/delete
-	 * a string to long-term storage
+	 * a string to long-term storage.
 	 */
 	let persister = {
 		/**
@@ -51,6 +52,20 @@
 				removed = true;
 			}
 			return Promise.resolve(removed);
+		},
+		/**
+		 * given an @id {String} @return {boolean} true if the id exists in storage
+		 */
+		hasItem: function (id) {
+			return localStorage.hasOwnProperty(id);
+		},
+		/**
+		 * generate an @id {String} that does not already exist in local storage
+		 */
+		generateId: function () {
+			var id = uuid();
+			// Astronomically small chance of collision but here for completeness
+			return persister.hasItem(id) ? persister.generateId() : id;
 		}
 	};
 
@@ -62,15 +77,21 @@
 		}
 		/**
 		 * create a new persistent object. @id {String} must be globally unique
+		 * @dflt {Object} initial values if this object is not in storage
 		 */
-		constructor(id, dflt = {}) {
+		constructor(id = false, dflt = {}) {
+			if (typeof id == 'object') {
+				dflt = id;
+				id = false;
+			}
+			id = id || uuid();
 			Object.defineProperty(this, 'id', {
 				value: id,
 				writable: false,
 				enumerable: false
 			});
 			this.ready = persister.getItem(id, this.serialize(dflt)).then((r) => {
-				return this.persistent = this.deserialize(r)
+				return this.persistent = this.deserialize(r);
 			});
 		}
 		/**
