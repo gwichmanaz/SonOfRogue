@@ -76,21 +76,47 @@
 			persister = ps;
 		}
 		/**
-		 * create a new persistent object. @id {String} must be globally unique
-		 * @dflt {Object} initial values if this object is not in storage
+		 * given an id (or array of ids), re-create the original object(s)
+		 * @return Promise that resolves with all those things
 		 */
-		constructor(id = false, dflt = {}) {
+		static reconstitute(id) {
+			if (Array.isArray(id)) {
+				return Promise.all(id.map((iid) => {
+					return Persist.reconstitute(iid);
+				}));
+			}
+			var kid = id + "~class";
+			return persister.getItem(kid).then((klass) => {
+				if (klass) {
+					var k = require("./" + klass + ".es6");
+					return new k(id);
+				}
+				return Promise.reject(new Error("Object with id " + id + " is missing or malformed"));
+			});
+		}
+		/**
+		 * create a new persistent object. @id {String} must be globally unique
+		 * @init {Object} initial values if this object is not in storage
+		 * @dflt {Object} default values for anything not set in initial
+		 */
+		constructor(id = false, init = {}, dflt = {}) {
+			// Allow for possibility of passing in an init (and possibly default) but no ID
 			if (typeof id == 'object') {
-				dflt = id;
+				dflt = init;
+				init = id;
 				id = false;
 			}
+			init = Object.assign({}, dflt, init);
 			id = id || uuid();
+			var kid = id + "~class";
+			// The ID may not be modified once set
 			Object.defineProperty(this, 'id', {
 				value: id,
 				writable: false,
 				enumerable: false
 			});
-			this.ready = persister.getItem(id, this.serialize(dflt)).then((r) => {
+			persister.getItem(kid, this.constructor.name);
+			this.ready = persister.getItem(id, this.serialize(init)).then((r) => {
 				return this.persistent = this.deserialize(r);
 			});
 		}
@@ -112,6 +138,14 @@
 			return this.ready.then(() => {
 				persister.setItem(this.id, this.serialize(this.persistent));
 			});
+		}
+		/**
+		 * remove me from persistence, should be done only when I'm not going to exist anymore
+		 */
+		forget() {
+			var kid = this.id + "~class";
+			persiter.removeItem(this.id);
+			persister.removeItem(kid);
 		}
 	}
 }
