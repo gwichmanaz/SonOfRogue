@@ -78,6 +78,7 @@
 		/**
 		 * given an id (or array of ids), re-create the original object(s)
 		 * @return Promise that resolves with all those things
+		 * Also, just to be nice, don't resolve the promise until the object is ready for use
 		 */
 		static reconstitute(id) {
 			if (Array.isArray(id)) {
@@ -89,7 +90,8 @@
 			return persister.getItem(kid).then((klass) => {
 				if (klass) {
 					var k = require("./" + klass + ".es6");
-					return new k(id);
+					var i = new k(id);
+					return i.ready();
 				}
 				return Promise.reject(new Error("Object with id " + id + " is missing or malformed"));
 			});
@@ -117,7 +119,8 @@
 			});
 			persister.getItem(kid, this.constructor.name);
 			this.ready = persister.getItem(id, this.serialize(init)).then((r) => {
-				return this.persistent = this.deserialize(r);
+				this.persistent = this.deserialize(r);
+				return this;
 			});
 		}
 		/**
