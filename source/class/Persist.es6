@@ -2,6 +2,7 @@
  * Base class for any persistent object
  */
 {
+	let uuid = require('../lib/uuid.js');
 	/*
 	 * if we are not in a browser, get ourselves some local storage
 	 */
@@ -11,7 +12,7 @@
 	}
 	/*
 	 * Default persister.  Persister is a singleton that can save/restore/delete
-	 * a string to long-term storage
+	 * a string to long-term storage.
 	 */
 	let persister = {
 		/**
@@ -51,6 +52,20 @@
 				removed = true;
 			}
 			return Promise.resolve(removed);
+		},
+		/**
+		 * given an @id {String} @return {boolean} true if the id exists in storage
+		 */
+		hasItem: function (id) {
+			return localStorage.hasOwnProperty(id);
+		},
+		/**
+		 * generate an @id {String} that does not already exist in local storage
+		 */
+		generateId: function () {
+			var id = uuid();
+			// Astronomically small chance of collision but here for completeness
+			return persister.hasItem(id) ? persister.generateId() : id;
 		}
 	};
 
@@ -61,16 +76,51 @@
 			persister = ps;
 		}
 		/**
-		 * create a new persistent object. @id {String} must be globally unique
+		 * given an id (or array of ids), re-create the original object(s)
+		 * @return Promise that resolves with all those things
+		 * Also, just to be nice, don't resolve the promise until the object is ready for use
 		 */
-		constructor(id, dflt = {}) {
+		static reconstitute(id) {
+			if (Array.isArray(id)) {
+				return Promise.all(id.map((iid) => {
+					return Persist.reconstitute(iid);
+				}));
+			}
+			var kid = id + "~class";
+			return persister.getItem(kid).then((klass) => {
+				if (klass) {
+					var k = require("./" + klass + ".es6");
+					var i = new k(id);
+					return i.ready();
+				}
+				return Promise.reject(new Error("Object with id " + id + " is missing or malformed"));
+			});
+		}
+		/**
+		 * create a new persistent object. @id {String} must be globally unique
+		 * @init {Object} initial values if this object is not in storage
+		 * @dflt {Object} default values for anything not set in initial
+		 */
+		constructor(id = false, init = {}, dflt = {}) {
+			// Allow for possibility of passing in an init (and possibly default) but no ID
+			if (typeof id == 'object') {
+				dflt = init;
+				init = id;
+				id = false;
+			}
+			init = Object.assign({}, dflt, init);
+			id = id || uuid();
+			var kid = id + "~class";
+			// The ID may not be modified once set
 			Object.defineProperty(this, 'id', {
 				value: id,
 				writable: false,
 				enumerable: false
 			});
-			this.ready = persister.getItem(id, this.serialize(dflt)).then((r) => {
-				return this.persistent = this.deserialize(r)
+			persister.getItem(kid, this.constructor.name);
+			this.ready = persister.getItem(id, this.serialize(init)).then((r) => {
+				this.persistent = this.deserialize(r);
+				return this;
 			});
 		}
 		/**
@@ -91,6 +141,14 @@
 			return this.ready.then(() => {
 				persister.setItem(this.id, this.serialize(this.persistent));
 			});
+		}
+		/**
+		 * remove me from persistence, should be done only when I'm not going to exist anymore
+		 */
+		forget() {
+			var kid = this.id + "~class";
+			persiter.removeItem(this.id);
+			persister.removeItem(kid);
 		}
 	}
 }
