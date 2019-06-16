@@ -2,7 +2,7 @@ Menu.mp3 plays on the opening title and any time a menu is open.
 
 Safe_Room.mp3 plays any time you are in a Safe Room.
 
-Cave_#.mp3 plays while you are exploring in real time. In the Demo, a random track is chosen each time this track would play; in the full game, a specific track will play on each floor.
+Cave_#.mp3 plays while you are exploring in real time. In the Demo, a random track is chosen each time this track would play; in the full game, a specific track will play depending on the floor depth.
 
 Item_Get.mp3 plays when you open a chest.
 
