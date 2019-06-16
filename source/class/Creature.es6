@@ -4,6 +4,10 @@
 	 * i.e. everything that needs to be saved when the game is saved
 	 * any information that can be derived from more basic information should not be included here
 	 * but should be calculated when needed
+	 * position indicates where the creature is on the current level map
+	 * destination represents where the creature WANTS TO BE on the current level map
+	 * Any time a creature is allowed to move they will move to get closer to their destination.
+	 * destination may change asynchronously to actual movement.
 	 */
 	let base = {
 		stats: {
@@ -21,6 +25,14 @@
 		klass: "",
 		alignment: "",
 		inventory: [],
+		position: {
+			x: 0,
+			y: 0,
+		},
+		destination: {
+			x: 0,
+			y: 0
+		}
 	};
 	let Persist = require('./Persist.es6');
 	let RNG = require('./RNG.es6');
