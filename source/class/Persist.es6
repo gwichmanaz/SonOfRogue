@@ -6,7 +6,12 @@
 	/*
 	 * if we are not in a browser, get ourselves some local storage
 	 */
-	if (typeof localStorage == "undefined") {
+	var localStorage;
+
+	if (typeof window != "undefined" && window.localStorage) {
+		localStorage = window.localStorage;
+	} else {
+		console.log("We are not in a browser so we must be in node land");
 		var Storage = require("../lib/localStorage.js");
 		var localStorage = new Storage("./persist.txt"); // TODO: some way to configure
 	}
