@@ -7,12 +7,22 @@
 	let Clock = require('./Clock.es6');
 	let Persist = require('./Persist.es6');
 	let RNG = require('./RNG.es6');
+	let Level = require('./Level.es6');
 
 	module.exports = class Game extends Persist {
-		constructor() {
-		},
+		constructor(id, dflt) {
+			super(id, dflt);
+		}
+		/**
+		 * return the current level in the game.  For now,
+		 * just one level
+		 */
+		getLevel () {
+			this.level = this.level || new Level();
+			return this.level;
+		}
 		restore () {
-		},
+		}
 		save () {
 		}
 	};

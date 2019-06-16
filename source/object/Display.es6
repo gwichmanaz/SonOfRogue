@@ -5,6 +5,7 @@ const SPRITES = [
 	{ id: 'wall', file: 'asset/dungeonSprites/Stone.png'},
 	{ id: 'floor', file: 'asset/dungeonSprites/Gravel.png'},
 	{ id: 'void', file: 'asset/dungeonSprites/Void.png'},
+	{ id: 'door', file: 'asset/dungeonSprites/Door-Closed.png'}
 ];
 
 module.exports = {
