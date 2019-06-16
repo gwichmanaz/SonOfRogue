@@ -1,0 +1,9 @@
+Item_Get.mp3 plays when you open a chest.
+
+Amulet_Get.mp3 plays when you open the chest with the Amulet of yendor in it.
+
+Attack_Hit.mp3 plays when an attack hits and deals damage.
+
+Attack_Miss.mp3 plays when an attack misses and does not deal damage.
+
+Magic_#.mp3 play when different types of magic are used. These will not be used in the Demo.
