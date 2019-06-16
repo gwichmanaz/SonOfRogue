@@ -4,8 +4,6 @@ Safe_Room.mp3 plays any time you are in a Safe Room.
 
 Cave_#.mp3 plays while you are exploring in real time. In the Demo, a random track is chosen each time this track would play; in the full game, a specific track will play depending on the floor depth.
 
-Item_Get.mp3 plays when you open a chest.
-
 Battle_#.mp3 plays when Initiative is rolled and during turn based combat. In the Demo, a random track is chosen each time this track would play; in the full game, a specific track will play depending on the difficulty of the encounter.
 
 Victory.mp3 plays when you defeat the last enemy in combat. It stops playing and switches to Cave_#.mp3 when real-time play resumes.
