@@ -1,19 +1,19 @@
 {
 	let LevelGenerator = require('./LevelGenerator.es6');
 	let RNG = require('./RNG.es6');
-	const CLASSIC_WIDTH = 80;
-	const CLASSIC_HEIGHT = 24;
+	const CLASSIC_WIDTH = 110;
+	const CLASSIC_HEIGHT = 55;
 	const PLACEMENT_HEIGHT = Math.floor(CLASSIC_HEIGHT / 3);
 	const PLACEMENT_WIDTH = Math.floor(CLASSIC_WIDTH / 3);
-	const MAX_ROOM_HEIGHT = PLACEMENT_HEIGHT - 2;
-	const MAX_ROOM_WIDTH = PLACEMENT_WIDTH - 2;
-	const MIN_ROOM_HEIGHT = 3;
-	const MIN_ROOM_WIDTH = 3;
+	const MAX_ROOM_HEIGHT = PLACEMENT_HEIGHT - 3;
+	const MAX_ROOM_WIDTH = PLACEMENT_WIDTH - 3;
+	const MIN_ROOM_HEIGHT = 7;
+	const MIN_ROOM_WIDTH = 7;
 
 	/**
 	 * Level generator that behaves similar to classic rogue
 	 * (Or will when it is finished)
-	 * 80 x 24 level, 3x3 grid of rooms
+	 * 110 x 55 level, 3x3 grid of rooms
 	 */
 	module.exports = class LevelGeneratorClassic extends LevelGenerator {
 		/**
