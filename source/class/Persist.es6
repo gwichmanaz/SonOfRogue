@@ -96,7 +96,7 @@
 				if (klass) {
 					var k = require("./" + klass + ".es6");
 					var i = new k(id);
-					return i.ready();
+					return i.ready;
 				}
 				return Promise.reject(new Error("Object with id " + id + " is missing or malformed"));
 			});

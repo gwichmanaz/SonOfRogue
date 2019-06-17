@@ -9,6 +9,10 @@
 	let RNG = require('./RNG.es6');
 	let Level = require('./Level.es6');
 
+	let base = {
+		// id's of all my levels
+		levels: []
+	};
 	module.exports = class Game extends Persist {
 		constructor(id, dflt) {
 			super(id, dflt);
@@ -17,8 +21,10 @@
 		 * return the current level in the game.  For now,
 		 * just one level
 		 */
-		getLevel () {
-			this.level = this.level || new Level();
+		getLevel (levelNumber) {
+			this.level = this.level || new Level(false, {
+				generatorType: "Classic"
+			});
 			return this.level;
 		}
 		restore () {

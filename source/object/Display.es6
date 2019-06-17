@@ -11,7 +11,7 @@ const SPRITES = [
 module.exports = {
 	init() {
 		this.widgets = {};
-		this.app = new PIXI.Application({width: 800, height: 600});
+		this.app = new PIXI.Application({width: 80 * 16, height: 24 * 16});
 		document.body.appendChild(this.app.view);
 		return this.__loadSprites().then(() => this.__initUI());
 	},
