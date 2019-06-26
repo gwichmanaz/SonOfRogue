@@ -5,13 +5,14 @@ const SPRITES = [
 	{ id: 'wall', file: 'asset/dungeonSprites/Stone.png'},
 	{ id: 'floor', file: 'asset/dungeonSprites/Gravel.png'},
 	{ id: 'void', file: 'asset/dungeonSprites/Void.png'},
-	{ id: 'door', file: 'asset/dungeonSprites/Door-Closed.png'}
+	{ id: 'door-closed', file: 'asset/dungeonSprites/Door-Closed.png'},
+	{ id: 'door-open', file: 'asset/dungeonSprites/Door-Open.png'},
 ];
 
 module.exports = {
 	init() {
 		this.widgets = {};
-		this.app = new PIXI.Application({width: 110 * 16, height: 55 * 16});
+		this.app = new PIXI.Application({width: 600, height: 400 });
 		document.body.appendChild(this.app.view);
 		return this.__loadSprites().then(() => this.__initUI());
 	},

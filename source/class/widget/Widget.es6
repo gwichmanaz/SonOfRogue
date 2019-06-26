@@ -1,8 +1,12 @@
-import * as PIXI from 'pixi.js';
+const PIXI = require("pixi.js");
+const Viewport = require("pixi-viewport");
 
 module.exports = class Widget {
 	constructor (stage) {
-		this.container = new PIXI.Container();
+		this.container = new Viewport({ screenWidth: 500, screenHeight: 300 });
+		this.container.drag().pinch().decelerate();
+		this.container.x = 50;
+		this.container.y = 50;
 		stage.addChild(this.container);
 	}
 }

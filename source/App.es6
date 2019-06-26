@@ -24,7 +24,7 @@ function load() {
 	});
 }
 
-module.exports = { Clock, Event, RNG, Persist, load };
+module.exports = { Clock, Event, RNG, Persist, Display, load };
 
 // Not sure if browserify has some way of getting at this?
 if (typeof window != "undefined") {

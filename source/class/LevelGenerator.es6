@@ -1,7 +1,6 @@
 {
 	// (Abstract) base class for level generators
-	let Cell = require('./Cell.es6');
-	const cells = {};
+	let MapCell = require('./MapCell.es6');
 
 	module.exports = class LevelGenerator {
 		constructor() {
@@ -14,10 +13,8 @@
 		generateLevelMap(mapSeed) {
 			return [];
 		}
-		// Lazy-instantiate cells.
 		getCell(typ) {
-			cells[typ] = cells[typ] || new Cell(typ);
-			return cells[typ];
+			return MapCell.getMapCell(typ);
 		}
 	};
 }
