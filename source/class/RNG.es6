@@ -69,4 +69,19 @@ module.exports = class RNG {
 		}
 		return results.map((n) => (n / rolls) / perfect);
 	}
+	/**
+	 * take an array of items and return an array with the same items in shuffled order
+	 * @array the input array
+	 * @return an array with the items shuffled
+	 */
+	shuffle(array) {
+		let copy = array.slice(0);
+		for (let i = copy.length - 1; i > 0; i--) {
+			let j = this.between(0, i);
+			let temp = copy[i];
+			copy[i] = copy[j];
+			copy[j] = temp;
+		}
+		return copy;
+	}
 }
