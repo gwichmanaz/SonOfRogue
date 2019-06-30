@@ -89,7 +89,7 @@
 			console.log("BUILT", walk, "CONNECTIONS");
 			return {
 				cells: this.cells,
-				entry: this.__pickRandomLocation()
+				entry: this.__makeEntry()
 			};
 		}
 		__buildRoom(id, x, y) {
@@ -186,10 +186,17 @@
 		}
 		__pickRandomLocation(room) {
 			room = room || this.__pickRandomRoom();
+			// TODO: make sure location is unoccupied
 			return {
 				x: this.rng.between(room.left + 1, room.right - 1),
 				y: this.rng.between(room.top + 1, room.bottom - 1)
 			};
+		}
+		__makeEntry() {
+			var room = this.__pickRandomRoom();
+			room.safe = true;
+			// TODO: Make beds in each corner
+			return this.__pickRandomLocation(room);
 		}
 	};
 }

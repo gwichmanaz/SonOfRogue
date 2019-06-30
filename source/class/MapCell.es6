@@ -19,6 +19,10 @@
 			static: false,
 			states: ["open", "closed"],
 		},
+		"bed": {
+			canStep: false,
+			static: true
+		}
 	};
 	const staticCells = {};
 	const Cell = require("./Cell.es6");
