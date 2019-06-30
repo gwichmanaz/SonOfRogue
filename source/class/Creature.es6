@@ -26,12 +26,12 @@
 		alignment: "",
 		inventory: [],
 		position: {
-			x: 0,
-			y: 0,
+			x: undefined,
+			y: undefined,
 		},
 		destination: {
-			x: 0,
-			y: 0
+			x: undefined,
+			y: undefined
 		}
 	};
 	let Persist = require('./Persist.es6');

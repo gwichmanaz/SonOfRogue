@@ -8,14 +8,27 @@
 	let Persist = require('./Persist.es6');
 	let RNG = require('./RNG.es6');
 	let Level = require('./Level.es6');
+	let DemoFighter = require('./DemoFighter.es6');
 
 	let base = {
 		// id's of all my levels
-		levels: []
+		levels: [],
+		// id's of everyone in the party
+		party: []
 	};
 	module.exports = class Game extends Persist {
 		constructor(id, dflt) {
 			super(id, dflt);
+		}
+		/**
+		 * Create the adventuring party.  For demo, just create the demo hero
+		 * return a Promise so this can be replaced with a whole UI someday
+		 */
+		createParty () {
+			if (!this.party) {
+				this.party = [];
+				this.party.push(new DemoFighter());
+			}
 		}
 		/**
 		 * return the current level in the game.  For now,

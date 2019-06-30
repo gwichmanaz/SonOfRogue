@@ -22,7 +22,9 @@
 		 */
 		generateMap() {
 			this.ready.then(() => {
-				this.cells = LevelManager.generateLevelMap(this.persistent.generatorType, this.persistent.mapSeed);
+				var level = LevelManager.generateLevelMap(this.persistent.generatorType, this.persistent.mapSeed);
+				this.cells = level.cells;
+				this.entry = level.entry;
 			});
 		}
 

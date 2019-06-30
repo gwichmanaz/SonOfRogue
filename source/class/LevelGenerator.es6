@@ -11,7 +11,13 @@
 		 * base class returns empty map
 		 */
 		generateLevelMap(mapSeed) {
-			return [];
+			return {
+				cells: [],
+				entry: {
+					x: undefined,
+					y: undefined
+				}
+			};
 		}
 		getCell(typ) {
 			return MapCell.getMapCell(typ);

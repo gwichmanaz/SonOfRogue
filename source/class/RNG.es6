@@ -84,4 +84,11 @@ module.exports = class RNG {
 		}
 		return copy;
 	}
+
+	/**
+	 * given an array of values, return one at random
+	 */
+	randomEntry(array) {
+		return array[this.between(0, array.length -1)];
+	}
 }
