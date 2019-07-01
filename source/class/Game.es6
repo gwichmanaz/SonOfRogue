@@ -9,6 +9,7 @@
 	let RNG = require('./RNG.es6');
 	let Level = require('./Level.es6');
 	let DemoFighter = require('./DemoFighter.es6');
+	let EventBus = require('./EventBus.es6');
 
 	let base = {
 		// id's of all my levels
@@ -19,6 +20,8 @@
 	module.exports = class Game extends Persist {
 		constructor(id, dflt) {
 			super(id, dflt);
+			this.clock = new Clock();
+			this.event = new EventBus();
 		}
 		/**
 		 * Create the adventuring party.  For demo, just create the demo hero
@@ -28,10 +31,11 @@
 			if (!this.party) {
 				this.party = [];
 				this.party.push(new DemoFighter());
+				this.hero = 0; // index of the party member who is currently being controlled
 			}
 		}
 		/**
-		 * return the current level in the game.  For now,
+		 * @return the current level in the game.  For now,
 		 * just one level
 		 */
 		getLevel (levelNumber) {

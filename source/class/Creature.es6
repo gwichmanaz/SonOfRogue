@@ -1,4 +1,8 @@
 {
+	const REST_DELTA = {
+		x: 0,
+		y: 0
+	};
 	/**
 	 * defines the schema for all of the persistent information about a creature,
 	 * i.e. everything that needs to be saved when the game is saved
@@ -26,6 +30,7 @@
 		alignment: "",
 		inventory: [],
 		position: {
+			facing: "front", // front, back, left, right
 			x: undefined,
 			y: undefined,
 		},
@@ -46,6 +51,14 @@
 		roll(dice, sides) {
 			this.rng = this.rng || new RNG();
 			return this.rng.roll(dice, sides);
+		}
+		/**
+		 * @return the direction this creature is facing: left, right, front, back
+		 */
+		facing() {
+			let facing = "front";
+			// TODO: Make this change depending on what the creature's next move would be
+			return facing;
 		}
 		/**
 		 * make a check against a stat

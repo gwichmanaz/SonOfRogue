@@ -38,7 +38,7 @@
 		return oncefunc;
 	};
 
-	module.exports = class Event {
+	module.exports = class EventBus {
 		constructor() {
 			Object.assign(this, {
 				handlers: {},
