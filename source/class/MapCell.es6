@@ -61,12 +61,6 @@
 			super(cellType);
 			this.config = CONFIG_BY_TYPE[cellType];
 		}
-		getSprites() {
-			if (this.config.states) {
-				return this.config.states.map((s) => this.cellType + "-" + s);
-			}
-			return super.getSprites();
-		}
 		/**
 		 * return true if this map cell can have a creature or artifact on it
 		 * maybe should call it canBeOccupied?
