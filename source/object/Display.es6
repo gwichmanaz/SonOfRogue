@@ -2,11 +2,17 @@ import * as PIXI from 'pixi.js';
 const LevelView = require('../class/widget/LevelView.es6');
 
 const TEXTURES = [
+	// DUNGEON SPRITES
 	{ id: 'wall', file: 'asset/dungeonSprites/Stone.png'},
 	{ id: 'floor', file: 'asset/dungeonSprites/Gravel.png'},
 	{ id: 'void', file: 'asset/dungeonSprites/Void.png'},
 	{ id: 'door-closed', file: 'asset/dungeonSprites/Door-Closed.png'},
 	{ id: 'door-open', file: 'asset/dungeonSprites/Door-Open.png'},
+
+	// HERO SPRITES -- TODO: lots to make this animatable
+	{ id: 'Human', file: 'asset/heroSprites/standin.png'},
+
+	// CREATURE SPRITES
 ];
 
 module.exports = {
@@ -41,15 +47,30 @@ module.exports = {
 		return new PIXI.Sprite(this.getTextureForCell(cell));
 	},
 
+	getTextureForCreature(creature) {
+		var textureId = creature.getCreatureType();
+		// TODO: more detail, ultimately a creature might consist of multiple sprites
+		return PIXI.loader.resources[textureId].texture;
+	},
+
+	getSpriteForCreature(creature) {
+		return new PIXI.Sprite(this.getTextureForCreature(creature));
+	},
+
 	setGame(game) {
-		game.ready.then(() => {
-			this.game = game;
-			this.event = game.event;
+		this.game = game;
+		this.event = game.event;
+		this.event.on("gameReady", () => {
 			this.setLevel(game.getLevel());
+			this.setParty(game.getParty());
 		});
 	},
 
 	setLevel(level) {
 		this.widgets.levelView.setLevel(level);
-	}
+	},
+
+	setParty(party) {
+		this.widgets.levelView.setParty(party);
+	},
 }

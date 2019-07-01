@@ -41,9 +41,11 @@
 	};
 	let Persist = require('./Persist.es6');
 	let RNG = require('./RNG.es6');
+	let EventBus = require('./EventBus.es6');
 	module.exports = class Creature extends Persist {
 		constructor(id = false, init={}) {
 			super(id, init, base);
+			this.event = new EventBus();
 		}
 		/**
 		 * doing dice by composition rather than mixin, lazy-instantiate a die and roll it.
@@ -94,9 +96,40 @@
 		modifier(stat) {
 			return 0;
 		}
-		setDestination (d) {
+		setDestination(d) {
 			console.log("CREATURE DEST BEING SET TO", d);
-			this.persist.destination = d;
+			this.persistent.destination.x = d.x;
+			this.persistent.destination.y = d.y;
+		}
+		setPosition(d) {
+			console.log("CREATURE LOC BEING SET TO", d);
+			// TODO: generalize observables!
+			if (d.x == this.persistent.position.x && d.y == this.persistent.position.y) {
+				return;
+			}
+			this.persistent.position.x = d.x;
+			this.persistent.position.y = d.y;
+			if (this.persistent.position.x === this.persistent.destination.x && this.persistent.position.y === this.persistent.destination.y) {
+				console.log("I GOT WHERE I WAS GOING");
+				this.persistent.destination.x = undefined;
+				this.persistent.destination.y = undefined;
+			}
+			this.event.fire("positionChange", this.persistent.position);
+		}
+		onPositionChange(handler) {
+			this.event.on("positionChange", handler);
+		}
+		getCreatureType() {
+			return this.persistent.race;
+		}
+		getPosition() {
+			return this.persistent.position;
+		}
+		getDestination() {
+			if (this.persistent.destination.x !== undefined) {
+				return this.persistent.destination;
+			}
+			return null;
 		}
 	};
 }

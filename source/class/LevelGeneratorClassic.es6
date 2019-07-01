@@ -184,9 +184,9 @@
 		__pickRandomRoom() {
 			return this.rng.randomEntry(this.rooms);
 		}
-		__pickRandomLocation(room) {
+		__pickRandomPosition(room) {
 			room = room || this.__pickRandomRoom();
-			// TODO: make sure location is unoccupied
+			// TODO: make sure Position is unoccupied
 			return {
 				x: this.rng.between(room.left + 1, room.right - 1),
 				y: this.rng.between(room.top + 1, room.bottom - 1)
@@ -196,7 +196,7 @@
 			var room = this.__pickRandomRoom();
 			room.safe = true;
 			// TODO: Make beds in each corner
-			return this.__pickRandomLocation(room);
+			return this.__pickRandomPosition(room);
 		}
 	};
 }

@@ -15,6 +15,7 @@
 			base.mapSeed = Math.floor(Math.random() * 0xffffffff);
 			super(id, dflt, base);
 			this.generateMap();
+			this.creatures = [];
 		}
 
 		/**
@@ -32,12 +33,26 @@
 		 * retrieve the cell at x, y
 		 * can pass 2 numbers or 1 position object
 		 */
-		getCellAt (x, y) {
+		getCellAt(x, y) {
 			if (x.hasOwnProperty("x")) {
 				y = x.y;
 				x = x.x;
 			}
-			return this.cells[x][y];
+			return this.cells[x] && this.cells[x][y];
+		}
+
+		placeCreatureOnLevel(creature) {
+			this.creatures.push(creature);
+		}
+
+		moveCreatures() {
+			// TODO: deal with initiative and various speeds and all that.  For now, we're just moving the hero about
+			this.creatures.forEach(this.moveCreature.bind(this));
+		}
+
+		moveCreature(creature) {
+			var destination = creature.getDestination();
+			destination && creature.setPosition(this.getClosestAvailableCell(creature.getPosition(), destination));
 		}
 
 		/**
@@ -45,7 +60,7 @@
 		 * the cell closest to the destination, which may be moved to from the start position
 		 * TODO: check for creatures and artifacts that may be occupying the space
 		 */
-		getClosestAvailableCell (position, destination, hvid) {
+		getClosestAvailableCell(position, destination, hvid) {
 			var delta = {
 				x: Math.sign(destination.x - position.x),
 				y: Math.sign(destination.y - position.y),
@@ -66,7 +81,7 @@
 			var hcell = hmove && this.getCellAt(hmove);
 			var vcell = vmove && this.getCellAt(vmove);
 			var hmovePossible = hcell && hcell.canStep();
-			var ymovePossible = vcell && vcell.canStep();
+			var vmovePossible = vcell && vcell.canStep();
 			// If both moves are possible, choose 1
 			if (hmovePossible && vmovePossible) {
 				if (hvid === undefined) {
