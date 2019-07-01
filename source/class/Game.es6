@@ -22,6 +22,12 @@
 			super(id, dflt);
 			this.clock = new Clock();
 			this.event = new EventBus();
+			this.createParty();
+			this.event.on("setDestination", (p) => {
+				if (this.party && this.party[this.hero]) {
+					this.party[this.hero].setDestination(p);
+				}
+			});
 		}
 		/**
 		 * Create the adventuring party.  For demo, just create the demo hero
@@ -33,6 +39,7 @@
 				this.party.push(new DemoFighter());
 				this.hero = 0; // index of the party member who is currently being controlled
 			}
+			return Promise.resolve();
 		}
 		/**
 		 * @return the current level in the game.  For now,

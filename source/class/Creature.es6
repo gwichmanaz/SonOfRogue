@@ -94,5 +94,9 @@
 		modifier(stat) {
 			return 0;
 		}
+		setDestination (d) {
+			console.log("CREATURE DEST BEING SET TO", d);
+			this.persist.destination = d;
+		}
 	};
 }

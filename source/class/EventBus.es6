@@ -50,6 +50,7 @@
 		 * return a promise that resolves when all handlers have completed
 		 */
 		fire(eventName, payload) {
+			console.log("EVENTBUS FIRING", eventName, payload);
 			this.payloads[eventName] = payload;
 			if (!(this.handlers[eventName] && this.handlers[eventName].length)) {
 				return Promise.resolve();

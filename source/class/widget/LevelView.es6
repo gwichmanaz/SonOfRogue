@@ -13,7 +13,7 @@ module.exports = class LevelView extends Widget {
 					sprite.y = y * 16;
 					sprite.name = `${level.id}_${x}_${y}`;
 					if (cell.interactive) {
-						this.makeInteractive(cell, sprite);
+						this.makeInteractive(cell, sprite, x, y);
 					}
 					this.container.addChild(sprite);
 					cell.onStateChange(() => {

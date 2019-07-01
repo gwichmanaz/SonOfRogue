@@ -42,16 +42,14 @@ module.exports = {
 	},
 
 	setGame(game) {
-		this.game = game;
-		this.event = game.event;
-		this.setLevel(game.getLevel());
+		game.ready.then(() => {
+			this.game = game;
+			this.event = game.event;
+			this.setLevel(game.getLevel());
+		});
 	},
 
 	setLevel(level) {
 		this.widgets.levelView.setLevel(level);
-	},
-
-	on(eventName, handler) {
-		return this.event.on(eventName, handler);
 	}
 }
