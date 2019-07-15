@@ -1,5 +1,5 @@
-var Event = require('./Event.es6');
-module.exports = class Clock extends Event {
+var EventBus = require('./EventBus.es6');
+module.exports = class Clock extends EventBus {
 	/**
 	 * resolution: number of milliseconds between ticks of the clock
 	 * eventName: event for clock to fire when it ticks

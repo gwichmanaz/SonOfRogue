@@ -3,7 +3,6 @@
  */
 
 const Clock = require('./class/Clock.es6');
-const Event = require('./class/Event.es6');
 const RNG = require('./class/RNG.es6');
 const Persist = require('./class/Persist.es6');
 const Creature = require('./class/Creature.es6');
@@ -19,12 +18,11 @@ function load() {
 	Display.init().then(() => {
 		console.log('init complete');
 		const game = new Game();
-		const level = game.getLevel();
-		Display.setLevel(level);
+		Display.setGame(game);
 	});
 }
 
-module.exports = { Clock, Event, RNG, Persist, load };
+module.exports = { Clock, RNG, Persist, Display, load };
 
 // Not sure if browserify has some way of getting at this?
 if (typeof window != "undefined") {

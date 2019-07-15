@@ -1,5 +1,5 @@
 module.exports = class Cell {
-	constructor (spriteId) {
-		this.spriteId = spriteId;
+	constructor (cellType) {
+		this.cellType = cellType;
 	}
 }

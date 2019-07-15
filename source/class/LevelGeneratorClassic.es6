@@ -75,7 +75,6 @@
 				}
 			}
 
-
 			// Hook up the possible connections in random order until there are no isolated rooms
 			var shuffledConnections = this.rng.shuffle(CONNECTIONS);
 			let firstRoom = this.rooms[+(shuffledConnections[0][0])];
@@ -88,7 +87,10 @@
 				walk++;
 			}
 			console.log("BUILT", walk, "CONNECTIONS");
-			return this.cells;
+			return {
+				cells: this.cells,
+				entry: this.__makeEntry()
+			};
 		}
 		__buildRoom(id, x, y) {
 			let pX = x * PLACEMENT_WIDTH, pY = y * PLACEMENT_HEIGHT;
@@ -178,6 +180,23 @@
 			if (fromRoom.connected || toRoom.connected) {
 				fromRoom.connected = toRoom.connected = true;
 			}
+		}
+		__pickRandomRoom() {
+			return this.rng.randomEntry(this.rooms);
+		}
+		__pickRandomPosition(room) {
+			room = room || this.__pickRandomRoom();
+			// TODO: make sure Position is unoccupied
+			return {
+				x: this.rng.between(room.left + 1, room.right - 1),
+				y: this.rng.between(room.top + 1, room.bottom - 1)
+			};
+		}
+		__makeEntry() {
+			var room = this.__pickRandomRoom();
+			room.safe = true;
+			// TODO: Make beds in each corner
+			return this.__pickRandomPosition(room);
 		}
 	};
 }

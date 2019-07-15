@@ -1,4 +1,8 @@
 {
+	const REST_DELTA = {
+		x: 0,
+		y: 0
+	};
 	/**
 	 * defines the schema for all of the persistent information about a creature,
 	 * i.e. everything that needs to be saved when the game is saved
@@ -26,19 +30,22 @@
 		alignment: "",
 		inventory: [],
 		position: {
-			x: 0,
-			y: 0,
+			facing: "front", // front, back, left, right
+			x: undefined,
+			y: undefined,
 		},
 		destination: {
-			x: 0,
-			y: 0
+			x: undefined,
+			y: undefined
 		}
 	};
 	let Persist = require('./Persist.es6');
 	let RNG = require('./RNG.es6');
+	let EventBus = require('./EventBus.es6');
 	module.exports = class Creature extends Persist {
 		constructor(id = false, init={}) {
 			super(id, init, base);
+			this.event = new EventBus();
 		}
 		/**
 		 * doing dice by composition rather than mixin, lazy-instantiate a die and roll it.
@@ -46,6 +53,14 @@
 		roll(dice, sides) {
 			this.rng = this.rng || new RNG();
 			return this.rng.roll(dice, sides);
+		}
+		/**
+		 * @return the direction this creature is facing: left, right, front, back
+		 */
+		facing() {
+			let facing = "front";
+			// TODO: Make this change depending on what the creature's next move would be
+			return facing;
 		}
 		/**
 		 * make a check against a stat
@@ -80,6 +95,41 @@
 		 */
 		modifier(stat) {
 			return 0;
+		}
+		setDestination(d) {
+			console.log("CREATURE DEST BEING SET TO", d);
+			this.persistent.destination.x = d.x;
+			this.persistent.destination.y = d.y;
+		}
+		setPosition(d) {
+			console.log("CREATURE LOC BEING SET TO", d);
+			// TODO: generalize observables!
+			if (d.x == this.persistent.position.x && d.y == this.persistent.position.y) {
+				return;
+			}
+			this.persistent.position.x = d.x;
+			this.persistent.position.y = d.y;
+			if (this.persistent.position.x === this.persistent.destination.x && this.persistent.position.y === this.persistent.destination.y) {
+				console.log("I GOT WHERE I WAS GOING");
+				this.persistent.destination.x = undefined;
+				this.persistent.destination.y = undefined;
+			}
+			this.event.fire("positionChange", this.persistent.position);
+		}
+		onPositionChange(handler) {
+			this.event.on("positionChange", handler);
+		}
+		getCreatureType() {
+			return this.persistent.race;
+		}
+		getPosition() {
+			return this.persistent.position;
+		}
+		getDestination() {
+			if (this.persistent.destination.x !== undefined) {
+				return this.persistent.destination;
+			}
+			return null;
 		}
 	};
 }
