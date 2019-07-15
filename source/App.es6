@@ -9,15 +9,24 @@ const Creature = require('./class/Creature.es6');
 const Level = require('./class/Level.es6');
 const Game = require('./class/Game.es6');
 const Display = require('./object/Display.es6');
+const SoundManager = require('./object/SoundManager.es6');
 
 console.log("App.js setting module exports");
 var rng = new RNG();
 console.log(rng.roll("3d6"));
 
+function initialize() {
+	return Promise.all([
+		Display.init(),
+		SoundManager.init()
+	]);
+}
+
 function load() {
-	Display.init().then(() => {
+	initialize().then(() => {
 		console.log('init complete');
 		const game = new Game();
+		SoundManager.setGame(game);
 		Display.setGame(game);
 	});
 }
