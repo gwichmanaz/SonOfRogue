@@ -1,4 +1,5 @@
 {
+	// BEEP BOX STUFF
 	let beepbox = require("../lib/beepbox_synth.js");
 	let bb_themes = {
 		explore: "7n31s7k0l00e08t1Um0a7g0fj7i0r1o3210T0v0u00q1d1f6y0z1C2w2c0h3T0v0u00q1d1f6y0z1C2w2c0h5T0v0u00q1d1f3y0z1C2w2c0h0T2v0u02q0d1fay0z1C2w1b4h4h4h4h4h4i4x8i4h4h4h4h8N514h4h4h4h4h4h4h4p21fCKDnH3N41f2QQvl1BPMKKwOMaqfW2wo6CAX-CR_2ZdvNy9vAshbYz9bYyDR_YI_aJJI2DFd1elEAVk0",
@@ -7,6 +8,105 @@
 	let bb_synths = {
 	};
 	let bb_activeSynth;
+
+	/**
+	 * play the theme using a beepbox synthesizer
+	 * TODO: loop vs. once
+	 */
+	function beepboxPlayer(theme, loop) {
+		// lazy-init a synthesizer
+		console.log("BeepBox Playing", theme);
+		bb_synths[theme] = bb_synths[theme] || new beepbox.Synth(bb_themes[theme]);
+		if (loop) {
+			// we can overlap other sounds, but only one loop playing at a time please
+			if (bb_activeSynth) {
+				if (bb_activeSynth == bb_syths[theme]) {
+					// we are already playing the theme we want to play
+					return;
+				}
+				bb_activeSynth.pause();
+			}
+			bb_activeSynth = bb_synths[theme];
+		}
+		bb_synths[theme].play();
+	}
+
+	// WEB AUDIO (MP3) SUTFF
+	let AudioContext = window.AudioContext || window.webkitAudioContext;
+	let webAudioContext = AudioContext && new AudioContext();
+	// TODO: handle case where we fail to create an audio context; don't expect this to ever happen
+
+	let mp3_themes = {
+		explore: "asset/Music/Cave_1.mp3",
+		battle: "asset/Music/Battle_1.mp3"
+	};
+	let mp3_promises = {
+	};
+	let mp3_activeNode, mp3_activeTheme;
+
+	/**
+	 * given a URL to an audio file, return a promise that resolves with the decoded audio buffer
+	 */
+	function loadAudioFile(theme) {
+		var url = mp3_themes[theme];
+		var request = new XMLHttpRequest();
+		request.open('GET', url, true);
+		request.responseType = 'arraybuffer';
+		// TODO: don't assume that all of this succeeds
+		return new Promise((resolve, reject) => {
+			request.onload = () => {
+				webAudioContext.decodeAudioData(request.response, resolve);
+			};
+			request.send();
+		});
+	}
+
+	/**
+	 * start loading up all our MP3s
+	 * TODO: don't assume we will need them all, pre-load commonly used ones and let the rest get lazy loaded
+	 */
+	function mp3LoadAllThemes() {
+		Object.keys(mp3_themes).forEach((theme) => {
+			mp3_promises[theme] = loadAudioFile(theme);
+		});
+	}
+
+	function mp3Player(theme, loop) {
+		console.log("start playing", theme, loop);
+		mp3_promises[theme] = mp3_promises[theme] || loadAudioFile(theme);
+
+		if (loop) {
+			if (theme == mp3_activeTheme) {
+				// We are already looping on what they ask for, just keep playing
+				console.log("Already playing", theme);
+				return;
+			}
+			// Stop playing the old theme, and clear references
+			mp3_activeNode && mp3_activeNode.stop();
+			mp3_activeNode = mp3_activeTheme = null;
+		}
+
+		mp3_promises[theme].then((buffer) => {
+			// Create the node to play this theme.  Create a new node each time because once a node is stopped it cannot be restarted
+			console.log("Creating node for", theme);
+			var node = webAudioContext.createBufferSource();
+			node.buffer = buffer;
+			node.connect(webAudioContext.destination);
+			if (loop) {
+				node.loop = true;
+				mp3_activeNode = node;
+				mp3_activeTheme = theme;
+			}
+			node.start(0);
+		});
+	}
+
+	function noPlayer(theme, loop) {
+		console.log("No player selected");
+	}
+
+	let player = noPlayer;
+
 	module.exports = {
 		/**
 		 * @return Promise that resolves when sound manager is ready
@@ -15,28 +115,19 @@
 		 * a sound must be in response to a user-action.
 		 */
 		init() {
-			// For now, we don't really need to do anything at init time
+			player = mp3Player; // TODO: choose player based on config, if we get BeepBox to not destroy the speakers :)
+			mp3LoadAllThemes();
+			// For now, just resolve.  In future, Maybe want to wait until some particular sound files are loaded?
 			return Promise.resolve();
 		},
 		/**
-		 * play the theme using a beepbox synthesizer
-		 * TODO: loop vs. once
+		 * play a sound, either once or in a continuous loop.
+		 * @theme {String} the name of the sound (generally corresponds to its purpose)
+		 * @loop {boolean} true to play continuously
+		 * this function is just a façade that passes the arguments on to our chosen player
 		 */
-		beepboxPlay(theme, loop) {
-			// lazy-init a synthesizer
-			bb_synths[theme] = bb_synths[theme] || new beepbox.Synth(bb_themes[theme]);
-			if (loop) {
-				// we can overlap other sounds, but only one loop playing at a time please
-				if (bb_activeSynth) {
-					bb_activeSynth.pause();
-				}
-				bb_activeSynth = bb_synths[theme];
-			}
-			bb_synths[theme].play();
-		},
 		play(theme, loop) {
-			// TODO: based on "original" vs "demo" config, play MP3 files vs beepbox songs
-			this.beepboxPlay(theme, loop);
+			player(theme, loop);
 		},
 		setGame(game) {
 			this.game = game;
