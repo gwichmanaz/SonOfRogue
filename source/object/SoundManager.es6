@@ -26,9 +26,9 @@
 				}
 				bb_activeSynth.pause();
 			}
-			bb_activeSynth = bb_synths[theme];
+			bb_activeSynth = theme && bb_synths[theme];
 		}
-		bb_synths[theme].play();
+		theme && bb_synths[theme].play();
 	}
 
 	// WEB AUDIO (MP3) SUTFF
@@ -42,7 +42,7 @@
 	};
 	let mp3_promises = {
 	};
-	let mp3_activeNode, mp3_activeTheme;
+	let mp3_activeNode = null, mp3_activeTheme = null;
 
 	/**
 	 * given a URL to an audio file, return a promise that resolves with the decoded audio buffer
@@ -73,7 +73,6 @@
 
 	function mp3Player(theme, loop) {
 		console.log("start playing", theme, loop);
-		mp3_promises[theme] = mp3_promises[theme] || loadAudioFile(theme);
 
 		if (loop) {
 			if (theme == mp3_activeTheme) {
@@ -86,6 +85,12 @@
 			mp3_activeNode = mp3_activeTheme = null;
 		}
 
+		// You can pass in a null theme to stop any existing loop
+		if (!theme) {
+			return;
+		}
+
+		mp3_promises[theme] = mp3_promises[theme] || loadAudioFile(theme);
 		mp3_promises[theme].then((buffer) => {
 			// Create the node to play this theme.  Create a new node each time because once a node is stopped it cannot be restarted
 			console.log("Creating node for", theme);
@@ -136,5 +141,14 @@
 				this.play("explore", true);
 			});
 		},
+		masterSwitch(onOff) {
+			// TODO: choose player based on config, if we get BeepBox to not destroy the speakers :)
+			console.log("setting sound player based on masterSwitch", onOff);
+
+			// Stop any sound that might already be playing
+			player(null, true);
+
+			player = onOff ? mp3Player : noPlayer;
+		}
 	};
 }

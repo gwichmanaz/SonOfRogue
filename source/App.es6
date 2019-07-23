@@ -22,11 +22,26 @@ function initialize() {
 	]);
 }
 
+/**
+ * Get the value for a key on the search string (after the ? on the URL)
+ * naive implementation assumes keys and values will not need to be URIdecoded.
+ */
+function valueFromUrl(key) {
+	var r = new RegExp(`${key}=([^&]*)`);
+	var match = document.location.search.match(r);
+	if (match && match[1]) {
+		return match[1];
+	}
+	return null;
+}
+
 function load() {
 	initialize().then(() => {
 		console.log('init complete');
 		const game = new Game();
 		SoundManager.setGame(game);
+		// Until we get a settings UI, turn sound off with test.html?sound=off
+		SoundManager.masterSwitch(valueFromUrl("sound") != "off");
 		Display.setGame(game);
 	});
 }
