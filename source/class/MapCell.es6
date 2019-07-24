@@ -34,8 +34,6 @@
 			static: false,
 			states: ["open", "closed"],
 			interact: function (game, doorCell, x, y) {
-				// Until the "USE" button is implemented, clicking on a door will use (i.e. open/close) it if you are right next to
-				// it, or set the destination if you are farther away
 				var hero = game.getActor();
 				var heroPosition = hero.getPosition();
 				// TODO: make a general util to get distance between 2 positions
@@ -44,9 +42,8 @@
 				if (xdist <= 1 && ydist <= 1) {
 					console.log("Next to door, open or close it", doorCell.getState());
 					doorCell.setState(doorCell.getState() == "open" ? "closed" : "open");
-				} else {
-					hero.setDestination({ x, y });
 				}
+				// Otherwise do nothing, you are too far away
 			}
 		},
 		"bed": {
