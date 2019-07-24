@@ -39,6 +39,9 @@
 				// TODO: make a general util to get distance between 2 positions
 				var xdist = Math.abs(heroPosition.x - x);
 				var ydist = Math.abs(heroPosition.y - y);
+				if (xdist == 0 && ydist == 0) {
+					return; // no playing with the door while I'm on it.
+				}
 				if (xdist <= 1 && ydist <= 1) {
 					console.log("Next to door, open or close it", doorCell.getState());
 					doorCell.setState(doorCell.getState() == "open" ? "closed" : "open");
