@@ -52,20 +52,24 @@
 
 		moveCreature(creature) {
 			var destination = creature.getDestination();
-			destination && creature.setPosition(this.getClosestAvailableCell(creature.getPosition(), destination));
+			// TODO: pass in number of steps this creature could actually take
+			destination && creature.setPosition(this.getClosestAvailableCell(creature.getPosition(), destination, 3));
 		}
 
 		/**
 		 * given a position and a destination, return the position of
 		 * the cell closest to the destination, which may be moved to from the start position
+		 * @steps number of steps this character can take right now.  > 3 means character may move diagonally
+		 * (orthognal move costs two steps, diagonal costs 3)
+		 * @hvid optional boolean, alternate true/false or leave it undefined to get orthogonal movement
 		 * TODO: check for creatures and artifacts that may be occupying the space
 		 */
-		getClosestAvailableCell(position, destination, hvid) {
+		getClosestAvailableCell(position, destination, steps, hvid) {
 			var delta = {
 				x: Math.sign(destination.x - position.x),
 				y: Math.sign(destination.y - position.y),
 			};
-			var hmove = false, vmove = false;
+			var hmove = false, vmove = false, dmove = false;
 			if (delta.x != 0) {
 				hmove = {
 					x: delta.x + position.x,
@@ -78,10 +82,22 @@
 					y: delta.y + position.y
 				};
 			}
+			if (steps >= 3 && delta.x != 0 && delta.y != 0) {
+				dmove = {
+					x: delta.x + position.x,
+					y: delta.y + position.y
+				};
+			}
 			var hcell = hmove && this.getCellAt(hmove);
 			var vcell = vmove && this.getCellAt(vmove);
+			var dcell = dmove && this.getCellAt(dmove);
 			var hmovePossible = hcell && hcell.canStep();
 			var vmovePossible = vcell && vcell.canStep();
+			var dmovePossible = dcell && dcell.canStep();
+			// Always take the diagonal move if we can
+			if (dmovePossible) {
+				return dmove;
+			}
 			// If both moves are possible, choose 1
 			if (hmovePossible && vmovePossible) {
 				if (hvid === undefined) {
