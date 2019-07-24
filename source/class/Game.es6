@@ -55,7 +55,11 @@
 		createParty() {
 			if (!this.party) {
 				this.party = [];
-				this.party.push(new DemoFighter());
+				let demoFighter = new DemoFighter();
+				demoFighter.onPositionChange(() => {
+					this.event.fire("heroMoving");
+				});
+				this.party.push(demoFighter);
 				this.hero = 0; // index of the party member who is currently being controlled
 			}
 			return Promise.resolve();

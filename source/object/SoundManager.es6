@@ -103,6 +103,13 @@
 				mp3_activeTheme = theme;
 			}
 			node.start(0);
+			console.log("After node start", webAudioContext.state);
+			// NOTE: we did not necessarily really start, if there was no gesture on the call stack
+			// If we didn't start, then act like we stopped.
+			// It would be nice if JS just gave us an easy way to see if there's a gesture on the call stack
+			if (webAudioContext.state != "running") {
+				mp3_activeNode = mp3_activeTheme = null;
+			}
 		});
 	}
 
@@ -137,7 +144,7 @@
 		setGame(game) {
 			this.game = game;
 			this.event = game.event;
-			this.event.on("setDestination", () => {
+			this.event.on("heroMoving", () => {
 				this.play("explore", true);
 			});
 		},
