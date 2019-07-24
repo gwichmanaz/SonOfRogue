@@ -9,6 +9,8 @@
 	const MAX_ROOM_WIDTH = PLACEMENT_WIDTH - 3;
 	const MIN_ROOM_HEIGHT = 7;
 	const MIN_ROOM_WIDTH = 7;
+	const MAX_SKINNY_ROOMS = 3; // Maximum number of skinny rooms (rooms disguised as hallways)
+	const SKINNYROOM_CHANCE = 10; // one chance in X of a room being skinny
 
 	// The twelve possible room-to-room connections
 	const CONNECTIONS = ["01","12","03","14","25","34","45","36","47","58","67","78"];
@@ -69,9 +71,22 @@
 			}
 			// Build the rooms
 			let id = 0;
+			let numSkinny = 0;
 			for (let y = 0; y < 3; y++) {
 				for (let x = 0; x < 3; x++, id++) {
-					this.__buildRoom(id, x, y);
+					let w = 0, h = 0;
+					if (numSkinny < MAX_SKINNY_ROOMS) {
+						if (this.rng.between(1, SKINNYROOM_CHANCE) == 1) {
+							w = 1;
+						}
+						if (this.rng.between(1, SKINNYROOM_CHANCE) == 1) {
+							h = 1;
+						}
+						if (w || h) {
+							numSkinny++;
+						}
+					}
+					this.__buildRoom(id, x, y, w, h);
 				}
 			}
 
@@ -92,26 +107,34 @@
 				entry: this.__makeEntry()
 			};
 		}
-		__buildRoom(id, x, y) {
+		/**
+		 * build a room in "nonant" at x,y
+		 * pass in a width/height, or pass 0 for either to get a random size
+		 */
+		__buildRoom(id, x, y, w, h) {
 			let pX = x * PLACEMENT_WIDTH, pY = y * PLACEMENT_HEIGHT;
-			let roomHeight = this.rng.between(MIN_ROOM_HEIGHT, MAX_ROOM_HEIGHT);
-			let roomWidth = this.rng.between(MIN_ROOM_WIDTH, MAX_ROOM_WIDTH);
-			let spareWidth = (PLACEMENT_WIDTH - roomWidth) - 2;
-			let spareHeight = (PLACEMENT_HEIGHT - roomHeight) - 2;
+			let roomWidth = w || this.rng.between(MIN_ROOM_WIDTH, MAX_ROOM_WIDTH);
+			let roomHeight = h || this.rng.between(MIN_ROOM_HEIGHT, MAX_ROOM_HEIGHT);
+			let spareWidth = (PLACEMENT_WIDTH - roomWidth) - 3;
+			let spareHeight = (PLACEMENT_HEIGHT - roomHeight) - 3;
 			let firstX = this.rng.between(pX, pX + spareWidth);
 			let firstY = this.rng.between(pY, pY + spareHeight);
+			let isSkinny = roomWidth == 1 || roomHeight == 1;
 			console.log("Creating", roomWidth, "by", roomHeight, "room at", firstX, firstY);
-			let lastX = firstX + roomWidth, lastY = firstY + roomHeight;
+			let lastX = firstX + roomWidth + 1, lastY = firstY + roomHeight + 1;
 			for (let x = firstX; x <= lastX; x++) {
 				for (let y = firstY; y <= lastY; y++) {
 					let cellType = "floor";
 					if (x == firstX || x == lastX || y == firstY || y == lastY) {
-						cellType = "wall";
+						// TODO: hallways will have walls, so this can be walls for all rooms, but for now
+						// be like original rogue and make them void
+						cellType = isSkinny ? "void" : "wall";
 					}
 					this.cells[x][y] = this.getCell(cellType);
 				}
 			}
 			this.rooms[id] = {
+				skinny: isSkinny,
 				connected: false,
 				id: id,
 				row: y,
@@ -145,7 +168,7 @@
 				firstY = Math.min(fromY, toY);
 				lastY = Math.max(fromY, toY);
 				let bend = this.rng.between(firstX+1, lastX-1);
-				for (let walk = firstX + 1; walk < bend; walk++) {
+				for (let walk = firstX; walk < bend; walk++) {
 					this.cells[walk][fromY] = this.getCell("floor");
 				}
 				for (let walk = firstY; walk <= lastY; walk++) {
@@ -163,25 +186,29 @@
 				firstX = Math.min(fromX, toX);
 				lastX = Math.max(fromX, toX);
 				let bend = this.rng.between(firstY+1, lastY-1);
-				for (let walk = firstY + 1; walk < bend; walk++) {
+				for (let walk = firstY; walk < bend; walk++) {
 					this.cells[fromX][walk] = this.getCell("floor");
 				}
 				for (let walk = firstX; walk <= lastX; walk++) {
 					this.cells[walk][bend] = this.getCell("floor");
 				}
-				for (let walk = bend; walk < lastY; walk++) {
+				for (let walk = bend; walk <= lastY; walk++) {
 					this.cells[toX][walk] = this.getCell("floor");
 				}
 			} else {
 				console.log("can't build a corridor between these rooms", fromRoom, toRoom);
 				return;
 			}
-			let fromDoor = this.getCell("door");
-			let toDoor = this.getCell("door");
-			fromDoor.initialize(1, fromX, fromY, "closed");
-			toDoor.initialize(1, toX, toY, "closed");
-			this.cells[fromX][fromY] = fromDoor;
-			this.cells[toX][toY] = toDoor;
+			if (!fromRoom.skinny) {
+				let fromDoor = this.getCell("door");
+				fromDoor.initialize(1, fromX, fromY, "closed");
+				this.cells[fromX][fromY] = fromDoor;
+			}
+			if (!toRoom.skinny) {
+				let toDoor = this.getCell("door");
+				toDoor.initialize(1, toX, toY, "closed");
+				this.cells[toX][toY] = toDoor;
+			}
 			fromRoom.exits.push(toRoom.id);
 			toRoom.exits.push(fromRoom.id);
 			// If either room was connected before, both are connected now.
