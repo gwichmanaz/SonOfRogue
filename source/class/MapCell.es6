@@ -17,7 +17,7 @@
 			interactive: true,
 			canStep: true,
 			static: true,
-			interact: function (game, x, y) {
+			interact: function (game, cell, x, y) {
 				game.getActor().setDestination({ x, y });
 			}
 		},
@@ -29,22 +29,31 @@
 		"door": {
 			interactive: true,
 			canStep: function (doorCell) {
-				return doorCell.state == "open";
+				return doorCell.getState() == "open";
 			},
 			static: false,
 			states: ["open", "closed"],
-			interact: function (game, x, y) {
+			interact: function (game, doorCell, x, y) {
 				// Until the "USE" button is implemented, clicking on a door will use (i.e. open/close) it if you are right next to
 				// it, or set the destination if you are farther away
 				var hero = game.getActor();
-				hero.setDestination({ x, y });
+				var heroPosition = hero.getPosition();
+				// TODO: make a general util to get distance between 2 positions
+				var xdist = Math.abs(heroPosition.x - x);
+				var ydist = Math.abs(heroPosition.y - y);
+				if (xdist <= 1 && ydist <= 1) {
+					console.log("Next to door, open or close it", doorCell.getState());
+					doorCell.setState(doorCell.getState() == "open" ? "closed" : "open");
+				} else {
+					hero.setDestination({ x, y });
+				}
 			}
 		},
 		"bed": {
 			interactive: true,
 			canStep: false,
 			static: true,
-			interact: function (eventBus, x, y) {
+			interact: function (game, bedCell, x, y) {
 				// TODO... are beds map cells or are they artifacts?
 			}
 		}
@@ -77,7 +86,7 @@
 		}
 		interact(game, x, y) {
 			if (this.config.interactive) {
-				return this.config.interact(game, x, y);
+				return this.config.interact(game, this, x, y);
 			}
 		}
 		initialize(level, x, y, state) {
@@ -94,6 +103,9 @@
 		}
 		getState() {
 			return (this.cellState && this.cellState.getState()) || null;
+		}
+		setState(newState) {
+			this.cellState && this.cellState.setState(newState);
 		}
 		onStateChange(handler) {
 			this.cellState && this.cellState.on("stateChange", handler);

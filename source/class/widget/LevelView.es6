@@ -65,6 +65,6 @@ module.exports = class LevelView extends Widget {
 		}
 	}
 	cellStateChanged(cell, sprite) {
-		sprite.setTexture(this.display.getTextureForCell(cell));
+		sprite.texture = this.display.getTextureForCell(cell);
 	}
 }
