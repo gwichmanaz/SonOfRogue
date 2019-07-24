@@ -40,7 +40,10 @@ module.exports = {
 		if (cellState) {
 			textureId += "-" + cellState;
 		}
-		return PIXI.loader.resources[textureId].texture;
+		if (PIXI.loader.resources[textureId]) {
+			return PIXI.loader.resources[textureId].texture;
+		}
+		throw new Error(`No texture loaded for ${textureId}`);
 	},
 
 	getSpriteForCell(cell) {

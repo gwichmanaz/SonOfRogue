@@ -26,9 +26,8 @@
 			this.clock.tick(() => { this.clockAction(); });
 			this.event = new EventBus();
 			this.event.on("setDestination", (p) => {
-				if (this.party && this.party[this.hero]) {
-					this.party[this.hero].setDestination(p);
-				}
+				let hero = this.getActor();
+				hero.setDestination(p);
 			});
 			this.ready.then(() => {
 				if (this.persistent.levels.length == 0) {
@@ -76,6 +75,15 @@
 		}
 		getParty() {
 			return this.party;
+		}
+		/**
+		 * Get the creature who is currently acting.  For now it's always the hero
+		 */
+		getActor() {
+			if (this.party) {
+				return this.party[this.hero];
+			}
+			return null;
 		}
 		placePartyOnLevel() {
 			// TODO: Place party leader on entry square, and place others nearby in whatever spaces possible.

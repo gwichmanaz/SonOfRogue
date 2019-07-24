@@ -54,7 +54,7 @@ module.exports = class LevelView extends Widget {
 			console.log("Mouse up on", sprite);
 			sprite.isDown = false;
 			if (sprite.isOver) {
-				cell.interact(display.event, x, y);
+				cell.interact(display.game, x, y);
 			}
 		}
 		sprite.mouseover = function () {

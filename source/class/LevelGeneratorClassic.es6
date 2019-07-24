@@ -134,16 +134,18 @@
 			this.__buildCorridor(this.rooms[fromId], this.rooms[toId]);
 		}
 		__buildCorridor(fromRoom, toRoom) {
+			var firstX, firstY, lastX, lastY;
+			var fromX, fromY, toX, toY;
 			if (fromRoom.row == toRoom.row) {
 				// same row, corridor will be horizontal
-				let firstX = fromRoom.right;
-				let fromY = this.rng.between(fromRoom.top + 1, fromRoom.bottom - 1);
-				let lastX = toRoom.left;
-				let toY = this.rng.between(toRoom.top + 1, toRoom.bottom - 1);
-				let firstY = Math.min(fromY, toY);
-				let lastY = Math.max(fromY, toY);
+				fromX = firstX = fromRoom.right;
+				fromY = this.rng.between(fromRoom.top + 1, fromRoom.bottom - 1);
+				toX = lastX = toRoom.left;
+				toY = this.rng.between(toRoom.top + 1, toRoom.bottom - 1);
+				firstY = Math.min(fromY, toY);
+				lastY = Math.max(fromY, toY);
 				let bend = this.rng.between(firstX+1, lastX-1);
-				for (let walk = firstX; walk < bend; walk++) {
+				for (let walk = firstX + 1; walk < bend; walk++) {
 					this.cells[walk][fromY] = this.getCell("floor");
 				}
 				for (let walk = firstY; walk <= lastY; walk++) {
@@ -154,26 +156,32 @@
 				}
 			} else if (fromRoom.column == toRoom.column) {
 				// same column, corridor will be vertical
-				let firstY = fromRoom.bottom;
-				let fromX = this.rng.between(fromRoom.left + 1, fromRoom.right - 1);
-				let lastY = toRoom.top;
-				let toX = this.rng.between(toRoom.left + 1, toRoom.right - 1);
-				let firstX = Math.min(fromX, toX);
-				let lastX = Math.max(fromX, toX);
+				fromY = firstY = fromRoom.bottom;
+				fromX = this.rng.between(fromRoom.left + 1, fromRoom.right - 1);
+				toY = lastY = toRoom.top;
+				toX = this.rng.between(toRoom.left + 1, toRoom.right - 1);
+				firstX = Math.min(fromX, toX);
+				lastX = Math.max(fromX, toX);
 				let bend = this.rng.between(firstY+1, lastY-1);
-				for (let walk = firstY; walk < bend; walk++) {
+				for (let walk = firstY + 1; walk < bend; walk++) {
 					this.cells[fromX][walk] = this.getCell("floor");
 				}
 				for (let walk = firstX; walk <= lastX; walk++) {
 					this.cells[walk][bend] = this.getCell("floor");
 				}
-				for (let walk = bend; walk <= lastY; walk++) {
+				for (let walk = bend; walk < lastY; walk++) {
 					this.cells[toX][walk] = this.getCell("floor");
 				}
 			} else {
 				console.log("can't build a corridor between these rooms", fromRoom, toRoom);
 				return;
 			}
+			let fromDoor = this.getCell("door");
+			let toDoor = this.getCell("door");
+			fromDoor.initialize(1, fromX, fromY, "closed");
+			toDoor.initialize(1, toX, toY, "closed");
+			this.cells[fromX][fromY] = fromDoor;
+			this.cells[toX][toY] = toDoor;
 			fromRoom.exits.push(toRoom.id);
 			toRoom.exits.push(fromRoom.id);
 			// If either room was connected before, both are connected now.

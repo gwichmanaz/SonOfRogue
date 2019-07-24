@@ -17,8 +17,8 @@
 			interactive: true,
 			canStep: true,
 			static: true,
-			interact: function (eventBus, x, y) {
-				eventBus.fire("setDestination", { x, y });
+			interact: function (game, x, y) {
+				game.getActor().setDestination({ x, y });
 			}
 		},
 		"wall": {
@@ -33,9 +33,11 @@
 			},
 			static: false,
 			states: ["open", "closed"],
-			interact: function (eventBus, x, y) {
-				// TODO... doors are funny things, but for now, just set the destination
-				eventBus.fire("setDestination", { x, y });
+			interact: function (game, x, y) {
+				// Until the "USE" button is implemented, clicking on a door will use (i.e. open/close) it if you are right next to
+				// it, or set the destination if you are farther away
+				var hero = game.getActor();
+				hero.setDestination({ x, y });
 			}
 		},
 		"bed": {
@@ -49,6 +51,7 @@
 	};
 	const staticCells = {};
 	const Cell = require("./Cell.es6");
+	const CellState = require("./CellState.es6");
 	module.exports = class MapCell extends Cell {
 		static getMapCell(cellType) {
 			if (CONFIG_BY_TYPE[cellType].static) {
@@ -72,9 +75,9 @@
 		interactive() {
 			return this.config.interactive;
 		}
-		interact(eventBus, x, y) {
+		interact(game, x, y) {
 			if (this.config.interactive) {
-				return this.config.interact(eventBus, x, y);
+				return this.config.interact(game, x, y);
 			}
 		}
 		initialize(level, x, y, state) {
@@ -87,13 +90,13 @@
 			if (this.cellState) {
 				throw new Error("Cell already initialized");
 			}
-			this.cellState = new CellState(level, x, y, state);
+			this.cellState = new CellState(level, x, y, this.config.states, state);
 		}
 		getState() {
 			return (this.cellState && this.cellState.getState()) || null;
 		}
 		onStateChange(handler) {
-			this.cellState && this.cellState.on("stateChange", changeHandler);
+			this.cellState && this.cellState.on("stateChange", handler);
 		}
 	};
 }

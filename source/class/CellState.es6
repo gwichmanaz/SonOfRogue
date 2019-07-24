@@ -8,11 +8,12 @@
 	 */
 	module.exports = class CellState extends EventBus {
 		constructor(levelId, x, y, states, current) {
-			this.current = current;
+			super();
 			this.states = states;
 			this.levelId = levelId;
 			this.x = x;
 			this.y = y;
+			this.setState(current || 0);
 		}
 		setStateIndex(index) {
 			if (isNaN(index) || index < 0 || index >= this.states.length) {
