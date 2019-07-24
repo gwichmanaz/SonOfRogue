@@ -42,8 +42,10 @@
 				if (xdist <= 1 && ydist <= 1) {
 					console.log("Next to door, open or close it", doorCell.getState());
 					doorCell.setState(doorCell.getState() == "open" ? "closed" : "open");
+				} else if (doorCell.canStep()) {
+					hero.setDestination({ x, y });
 				}
-				// Otherwise do nothing, you are too far away
+				// Otherwise do nothing, you are too far away and the door is closed
 			}
 		},
 		"bed": {
