@@ -39,7 +39,7 @@ module.exports = class LevelView extends Widget {
 				}
 				this.container.addChild(sprite);
 				cell.onStateChange(() => {
-					this.cellStateChanged(cell, sprite);
+					this.cellStateChanged(level, cell, x, y, sprite);
 				});
 			}
 		}
@@ -64,7 +64,7 @@ module.exports = class LevelView extends Widget {
 			this.isOver = false;
 		}
 	}
-	cellStateChanged(cell, sprite) {
-		sprite.texture = this.display.getTextureForCell(cell);
+	cellStateChanged(level, cell, x, y, sprite) {
+		sprite.texture = this.display.getTextureForCell(level, cell, x, y);
 	}
 }
