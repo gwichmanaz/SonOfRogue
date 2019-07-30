@@ -3,7 +3,23 @@ const LevelView = require('../class/widget/LevelView.es6');
 
 const TEXTURES = [
 	// DUNGEON SPRITES
-	{ id: 'wall', file: 'asset/dungeonSprites/Stone.png'},
+	{ id: 'wall', file: 'asset/dungeonSprites/Wall-X.png'},
+	{ id: 'wall-', file: 'asset/dungeonSprites/Wall-X.png'},
+	{ id: 'wall-b', file: 'asset/dungeonSprites/Wall-b.png'},
+	{ id: 'wall-br', file: 'asset/dungeonSprites/Wall-br.png'},
+	{ id: 'wall-l', file: 'asset/dungeonSprites/Wall-l.png'},
+	{ id: 'wall-lb', file: 'asset/dungeonSprites/Wall-lb.png'},
+	{ id: 'wall-lbr', file: 'asset/dungeonSprites/Wall-lbr.png'},
+	{ id: 'wall-lr', file: 'asset/dungeonSprites/Wall-lr.png'},
+	{ id: 'wall-r', file: 'asset/dungeonSprites/Wall-r.png'},
+	{ id: 'wall-t', file: 'asset/dungeonSprites/Wall-t.png'},
+	{ id: 'wall-tb', file: 'asset/dungeonSprites/Wall-tb.png'},
+	{ id: 'wall-tbr', file: 'asset/dungeonSprites/Wall-tbr.png'},
+	{ id: 'wall-tl', file: 'asset/dungeonSprites/Wall-tl.png'},
+	{ id: 'wall-tlb', file: 'asset/dungeonSprites/Wall-tlb.png'},
+	{ id: 'wall-tlbr', file: 'asset/dungeonSprites/Wall-tlbr.png'},
+	{ id: 'wall-tlr', file: 'asset/dungeonSprites/Wall-tlr.png'},
+	{ id: 'wall-tr', file: 'asset/dungeonSprites/Wall-tr.png'},
 	{ id: 'floor', file: 'asset/dungeonSprites/Gravel.png'},
 	{ id: 'void', file: 'asset/dungeonSprites/Void.png'},
 	{ id: 'door-closed', file: 'asset/dungeonSprites/Door-Closed.png'},
@@ -34,9 +50,9 @@ module.exports = {
 		this.widgets.levelView = new LevelView(this, this.event);
 	},
 
-	getTextureForCell(cell) {
+	getTextureForCell(level, cell, x, y) {
 		var textureId = cell.cellType;
-		var cellState = cell.getState();
+		var cellState = cell.getState(level, x, y);
 		if (cellState) {
 			textureId += "-" + cellState;
 		}
@@ -46,8 +62,8 @@ module.exports = {
 		throw new Error(`No texture loaded for ${textureId}`);
 	},
 
-	getSpriteForCell(cell) {
-		return new PIXI.Sprite(this.getTextureForCell(cell));
+	getSpriteForCell(level, cell, x, y) {
+		return new PIXI.Sprite(this.getTextureForCell(level, cell, x, y));
 	},
 
 	getTextureForCreature(creature) {

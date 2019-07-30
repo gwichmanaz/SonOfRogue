@@ -25,6 +25,23 @@
 			interactive: false,
 			canStep: false,
 			static: true,
+			getState: function (level, cell, x, y) {
+				// State of a wall depends on its neighbours
+				function isWall(x, y) {
+					let cell = level.getCellAt(x, y);
+					return cell && cell.cellType == "wall";
+				}
+				// Create an object whose values are true if there's a wall in that direction
+				// tOP, lEFT, bOTTOM, rIGHT
+				let neighbours = {
+					t: isWall(x, y - 1),
+					l: isWall(x - 1, y),
+					b: isWall(x, y + 1),
+					r: isWall(x + 1, y)
+				}
+				let state = Object.keys(neighbours).filter((k) => neighbours[k]).join("");
+				return state;
+			}
 		},
 		"door": {
 			interactive: true,
@@ -103,8 +120,14 @@
 			}
 			this.cellState = new CellState(level, x, y, this.config.states, state);
 		}
-		getState() {
-			return (this.cellState && this.cellState.getState()) || null;
+		getState(level, x, y) {
+			if (this.cellState) {
+				return this.cellState.getState();
+			}
+			if (this.config.getState) {
+				return (this.config.getState(level, this, x, y));
+			}
+			return null;
 		}
 		setState(newState) {
 			this.cellState && this.cellState.setState(newState);
