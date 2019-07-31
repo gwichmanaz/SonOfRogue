@@ -19,8 +19,8 @@
 				}
 			};
 		}
-		getCell(typ) {
-			return MapCell.getMapCell(typ);
+		getCell(cellType, cellState) {
+			return MapCell.getMapCell(cellType, cellState);
 		}
 	};
 }

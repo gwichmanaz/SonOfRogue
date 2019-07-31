@@ -125,12 +125,15 @@
 			for (let x = firstX; x <= lastX; x++) {
 				for (let y = firstY; y <= lastY; y++) {
 					let cellType = "floor";
+					let cellState = isSkinny ? 'cobblestone' : 'tile';
 					if (x == firstX || x == lastX || y == firstY || y == lastY) {
 						// TODO: hallways will have walls, so this can be walls for all rooms, but for now
 						// be like original rogue and make them void
-						cellType = isSkinny ? "void" : "wall";
+						//cellType = isSkinny ? "void" : "wall";
+						cellType = "wall";
+						cellState = undefined;
 					}
-					this.cells[x][y] = this.getCell(cellType);
+					this.cells[x][y] = this.getCell(cellType, cellState);
 				}
 			}
 			this.rooms[id] = {
@@ -159,6 +162,11 @@
 		__buildCorridor(fromRoom, toRoom) {
 			var firstX, firstY, lastX, lastY;
 			var fromX, fromY, toX, toY;
+			let replaceVoidWithWall = (x, y) => {
+				if (this.cells[x][y].cellType == "void") {
+					this.cells[x][y] = this.getCell("wall");
+				}
+			}
 			if (fromRoom.row == toRoom.row) {
 				// same row, corridor will be horizontal
 				fromX = firstX = fromRoom.right;
@@ -168,14 +176,24 @@
 				firstY = Math.min(fromY, toY);
 				lastY = Math.max(fromY, toY);
 				let bend = this.rng.between(firstX+1, lastX-1);
-				for (let walk = firstX; walk < bend; walk++) {
-					this.cells[walk][fromY] = this.getCell("floor");
+				for (let walk = firstX; walk <= bend; walk++) {
+					replaceVoidWithWall(walk, fromY - 1);
+					this.cells[walk][fromY] = this.getCell("floor", "cobblestone");
+					replaceVoidWithWall(walk, fromY + 1);
 				}
+				replaceVoidWithWall(bend - 1, firstY - 1);
+				replaceVoidWithWall(bend + 1, firstY - 1);
 				for (let walk = firstY; walk <= lastY; walk++) {
-					this.cells[bend][walk] = this.getCell("floor");
+					replaceVoidWithWall(bend - 1, walk);
+					this.cells[bend][walk] = this.getCell("floor", "cobblestone");
+					replaceVoidWithWall(bend + 1, walk);
 				}
+				replaceVoidWithWall(bend - 1, lastY + 1);
+				replaceVoidWithWall(bend + 1, lastY + 1);
 				for (let walk = bend; walk <= lastX; walk++) {
-					this.cells[walk][toY] = this.getCell("floor");
+					replaceVoidWithWall(walk, toY - 1);
+					this.cells[walk][toY] = this.getCell("floor", "cobblestone");
+					replaceVoidWithWall(walk, toY + 1);
 				}
 			} else if (fromRoom.column == toRoom.column) {
 				// same column, corridor will be vertical
@@ -186,14 +204,24 @@
 				firstX = Math.min(fromX, toX);
 				lastX = Math.max(fromX, toX);
 				let bend = this.rng.between(firstY+1, lastY-1);
-				for (let walk = firstY; walk < bend; walk++) {
-					this.cells[fromX][walk] = this.getCell("floor");
+				for (let walk = firstY; walk <= bend; walk++) {
+					replaceVoidWithWall(fromX - 1, walk);
+					this.cells[fromX][walk] = this.getCell("floor", "cobblestone");
+					replaceVoidWithWall(fromX + 1, walk);
 				}
+				replaceVoidWithWall(firstX - 1, bend - 1);
+				replaceVoidWithWall(firstX - 1, bend + 1);
 				for (let walk = firstX; walk <= lastX; walk++) {
-					this.cells[walk][bend] = this.getCell("floor");
+					replaceVoidWithWall(walk, bend - 1);
+					this.cells[walk][bend] = this.getCell("floor", "cobblestone");
+					replaceVoidWithWall(walk, bend + 1);
 				}
+				replaceVoidWithWall(lastX + 1, bend - 1);
+				replaceVoidWithWall(lastX + 1, bend + 1);
 				for (let walk = bend; walk <= lastY; walk++) {
-					this.cells[toX][walk] = this.getCell("floor");
+					replaceVoidWithWall(toX - 1, walk);
+					this.cells[toX][walk] = this.getCell("floor", "cobblestone");
+					replaceVoidWithWall(toX + 1, walk);
 				}
 			} else {
 				console.log("can't build a corridor between these rooms", fromRoom, toRoom);

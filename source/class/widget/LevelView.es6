@@ -60,7 +60,7 @@ module.exports = class LevelView extends Widget {
 		sprite.mouseover = function () {
 			this.isOver = true;
 		}
-		sprite.mouseout = function () { 
+		sprite.mouseout = function () {
 			this.isOver = false;
 		}
 	}

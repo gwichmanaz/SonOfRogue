@@ -101,6 +101,10 @@
 			this.persistent.destination.x = d.x;
 			this.persistent.destination.y = d.y;
 		}
+		clearDestination() {
+			this.persistent.destination.x = undefined;
+			this.persistent.destination.y = undefined;
+		}
 		setPosition(d) {
 			console.log("CREATURE LOC BEING SET TO", d);
 			// TODO: generalize observables!
@@ -111,8 +115,7 @@
 			this.persistent.position.y = d.y;
 			if (this.persistent.position.x === this.persistent.destination.x && this.persistent.position.y === this.persistent.destination.y) {
 				console.log("I GOT WHERE I WAS GOING");
-				this.persistent.destination.x = undefined;
-				this.persistent.destination.y = undefined;
+				this.clearDestination();
 			}
 			this.event.fire("positionChange", this.persistent.position);
 		}

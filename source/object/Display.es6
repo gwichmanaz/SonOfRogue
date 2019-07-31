@@ -20,7 +20,11 @@ const TEXTURES = [
 	{ id: 'wall-tlbr', file: 'asset/dungeonSprites/Wall-tlbr.png'},
 	{ id: 'wall-tlr', file: 'asset/dungeonSprites/Wall-tlr.png'},
 	{ id: 'wall-tr', file: 'asset/dungeonSprites/Wall-tr.png'},
-	{ id: 'floor', file: 'asset/dungeonSprites/Gravel.png'},
+	{ id: 'floor-brick', file: 'asset/dungeonSprites/Floor-Brick16.png'},
+	{ id: 'floor-cobblestone', file: 'asset/dungeonSprites/Floor-Cobblestone.png'},
+	{ id: 'floor-dirt', file: 'asset/dungeonSprites/Floor-Dirt16.png'},
+	{ id: 'floor-grass', file: 'asset/dungeonSprites/Floor-Grass16.png'},
+	{ id: 'floor-tile', file: 'asset/dungeonSprites/Floor-Tile16.png'},
 	{ id: 'void', file: 'asset/dungeonSprites/Void.png'},
 	{ id: 'door-closed', file: 'asset/dungeonSprites/Door-Closed.png'},
 	{ id: 'door-open', file: 'asset/dungeonSprites/Door-Open.png'},
@@ -64,6 +68,7 @@ module.exports = {
 
 	getSpriteForCell(level, cell, x, y) {
 		return new PIXI.Sprite(this.getTextureForCell(level, cell, x, y));
+		//return new PIXI.TilingSprite(this.getTextureForCell(level, cell, x, y), 16, 16);
 	},
 
 	getTextureForCreature(creature) {
