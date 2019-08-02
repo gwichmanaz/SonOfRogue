@@ -19,9 +19,9 @@ module.exports = class LevelView extends Widget {
 	}
 	updatePosition(creature, sprite, pos) {
 		pos = pos || creature.getPosition();
-		console.log("PLACING CREATURE SPRITE AT", pos);
-		sprite.x = creature.getPosition().x * 16;
-		sprite.y = creature.getPosition().y * 16;
+		sprite.x = pos.x * 16;
+		sprite.y = pos.y * 16;
+		// Makes sure this sprite is visible within the view
 		// TODO: don't call this unless we really mean it.
 		this.container.ensureVisible(sprite.x, sprite.y, 16, 16);
 	}

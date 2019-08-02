@@ -52,7 +52,7 @@
 
 		moveCreature(tick, creature) {
 			var status = creature.getMovingStatus(tick);
-			if (status == "ready") {
+			if (status == "ready" || status == "stuck") {
 				var destination = creature.getDestination();
 				destination && creature.setMovingTo(this.getClosestAvailableCell(creature.getPosition(), destination));
 			} else if (status == "moving") {

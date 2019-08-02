@@ -101,6 +101,9 @@
 		modifier(stat) {
 			return 0;
 		}
+		/**
+		 * long-term movement... which arbitrary cell on the map does the creature want to get to?
+		 */
 		setDestination(d) {
 			console.log("CREATURE DEST BEING SET TO", d);
 			this.persistent.destination.x = d.x;
@@ -110,8 +113,11 @@
 			this.persistent.destination.x = undefined;
 			this.persistent.destination.y = undefined;
 		}
+		/**
+		 * medium-term movement... which adjacent cell should the creature move to?
+		 * @param delta an x,y point where x and y are both integers between -1 and 1
+		 */
 		setMovingTo(delta) {
-			console.log("CREATURE MOVING TO BEING SET TO", delta);
 			// TODO: sanity check that we are in a ready to move state
 			var diagonal = delta.x != 0 && delta.y != 0;
 			this.movingTo = delta;
@@ -119,6 +125,13 @@
 			this.stepsTaken = 0;
 			this.takeStep();
 		}
+		/**
+		 * short-term movement
+		 * creature on its way from a cell to an adjacent cell.  Logically it remains in the first cell
+		 * until it has gotten all the way to the destination, but on the screen it will be updated to a fractional
+		 * position
+		 * @tick: serial number of this clock tick; later this can be used to implement differences in speed
+		 */
 		takeStep(tick) {
 			this.stepsTaken += 1;
 			let distance = this.stepsTaken / this.stepsNeeded;
@@ -127,13 +140,17 @@
 				y: this.persistent.position.y + this.movingTo.y * distance
 			};
 			if (distance == 1) {
+				// I have fully arrived at the new position
 				this.setPosition(newPos);
 			} else {
+				// I am partway between old and new positions, fire the fractional position change so UI will show movement
 				this.event.fire("positionChange", newPos);
 			}
 		}
+		/**
+		 * update the logical position of a creature
+		 */
 		setPosition(d) {
-			console.log("CREATURE LOC BEING SET TO", d);
 			// TODO: generalize observables!
 			if (d.x == this.persistent.position.x && d.y == this.persistent.position.y) {
 				return;
@@ -144,16 +161,28 @@
 				console.log("I GOT WHERE I WAS GOING");
 				this.clearDestination();
 			}
+
+			// Clear any short-term movement
 			this.movingTo = null;
 			this.stepsTaken = this.stepsNeeded = 0;
+
 			this.event.fire("positionChange", this.persistent.position);
 		}
 		onPositionChange(handler) {
 			this.event.on("positionChange", handler);
 		}
-		// Return true if we are ready to start moving into a new cell
+		/**
+		 * What is my moving status?
+		 * stuck: I have a destination, but can't get closer to it
+		 * moving: I am partway between my current logical location and my next logical location
+		 * ready: I have a destination and I'm ready for the level to tell me which adjacent tile I should move to
+		 * resting: I have no short, medium, or long-term goal, I'm happy where I am
+		 */
 		getMovingStatus(tick) {
 			if (this.movingTo) {
+				if (this.movingTo.x == 0 && this.movingTo.y == 0) {
+					return "stuck";
+				}
 				return "moving";
 			}
 			if (this.getDestination() && this.movingTo == null) {

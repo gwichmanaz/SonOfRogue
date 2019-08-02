@@ -114,7 +114,7 @@
 	}
 
 	function noPlayer(theme, loop) {
-		console.log("No player selected");
+		//console.log("No sound player selected");
 	}
 
 	let player = noPlayer;
