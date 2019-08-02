@@ -45,22 +45,24 @@
 			this.creatures.push(creature);
 		}
 
-		moveCreatures() {
+		moveCreatures(tick) {
 			// TODO: deal with initiative and various speeds and all that.  For now, we're just moving the hero about
-			this.creatures.forEach(this.moveCreature.bind(this));
+			this.creatures.forEach(this.moveCreature.bind(this, tick));
 		}
 
-		moveCreature(creature) {
-			var destination = creature.getDestination();
-			// TODO: pass in number of steps this creature could actually take
-			destination && creature.setPosition(this.getClosestAvailableCell(creature.getPosition(), destination, 3));
+		moveCreature(tick, creature) {
+			var status = creature.getMovingStatus(tick);
+			if (status == "ready") {
+				var destination = creature.getDestination();
+				destination && creature.setMovingTo(this.getClosestAvailableCell(creature.getPosition(), destination));
+			} else if (status == "moving") {
+				creature.takeStep(tick);
+			}
 		}
 
 		/**
 		 * given a position and a destination, return the position of
 		 * the cell closest to the destination, which may be moved to from the start position
-		 * @steps number of steps this character can take right now.  > 3 means character may move diagonally
-		 * (orthognal move costs two steps, diagonal costs 3)
 		 * @hvid optional boolean, alternate true/false or leave it undefined to get orthogonal movement
 		 * TODO: check for creatures and artifacts that may be occupying the space
 		 */
@@ -82,7 +84,7 @@
 					y: delta.y + position.y
 				};
 			}
-			if (steps >= 3 && delta.x != 0 && delta.y != 0) {
+			if (delta.x != 0 && delta.y != 0) {
 				dmove = {
 					x: delta.x + position.x,
 					y: delta.y + position.y
@@ -96,7 +98,7 @@
 			var dmovePossible = dcell && dcell.canStep();
 			// Always take the diagonal move if we can
 			if (dmovePossible) {
-				return dmove;
+				return delta;
 			}
 			// If both moves are possible, choose 1
 			if (hmovePossible && vmovePossible) {
@@ -104,17 +106,30 @@
 					hvid = Math.random() > 0.5;
 				}
 				var even = position.x % 2 == position.y % 2;
-				return hvid == even ? hmove : vmove;
+				if (hvid == even) {
+					vmovePossible = false;
+				} else {
+					hmovePossible = false;
+				}
 			}
 			if (hmovePossible) {
-				return hmove;
+				return {
+					x: delta.x,
+					y: 0
+				};
 			}
 			if (vmovePossible) {
-				return vmove;
+				return {
+					x: 0,
+					y: delta.y
+				};
 			}
 			// Can't get there from here.
 			console.log("Can't get there from here", position, destination);
-			return position;
+			return {
+				x: 0,
+				y: 0
+			};
 		}
 
 		getSize () {

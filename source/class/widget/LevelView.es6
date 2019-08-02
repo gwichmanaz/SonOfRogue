@@ -11,14 +11,15 @@ module.exports = class LevelView extends Widget {
 			const sprite = this.display.getSpriteForCreature(member);
 			sprite.zIndex = CREATURE_ZINDEX;
 			this.updatePosition(member, sprite);
-			member.onPositionChange(() => {
-				this.updatePosition(member, sprite);
+			member.onPositionChange((pos) => {
+				this.updatePosition(member, sprite, pos);
 			});
 			this.container.addChild(sprite);
 		});
 	}
-	updatePosition(creature, sprite) {
-		console.log("PLACING CREATURE SPRITE AT", creature.getPosition());
+	updatePosition(creature, sprite, pos) {
+		pos = pos || creature.getPosition();
+		console.log("PLACING CREATURE SPRITE AT", pos);
 		sprite.x = creature.getPosition().x * 16;
 		sprite.y = creature.getPosition().y * 16;
 		// TODO: don't call this unless we really mean it.

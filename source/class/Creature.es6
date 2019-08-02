@@ -29,11 +29,13 @@
 		klass: "",
 		alignment: "",
 		inventory: [],
+		// Creature's current position on the map
 		position: {
 			facing: "front", // front, back, left, right
 			x: undefined,
 			y: undefined,
 		},
+		// Creature's desired ultimate destination
 		destination: {
 			x: undefined,
 			y: undefined
@@ -46,6 +48,9 @@
 		constructor(id = false, init={}) {
 			super(id, init, base);
 			this.event = new EventBus();
+			// Creature's next position on the map
+			this.movingTo = null;
+			this.step = 0;
 		}
 		/**
 		 * doing dice by composition rather than mixin, lazy-instantiate a die and roll it.
@@ -105,6 +110,28 @@
 			this.persistent.destination.x = undefined;
 			this.persistent.destination.y = undefined;
 		}
+		setMovingTo(delta) {
+			console.log("CREATURE MOVING TO BEING SET TO", delta);
+			// TODO: sanity check that we are in a ready to move state
+			var diagonal = delta.x != 0 && delta.y != 0;
+			this.movingTo = delta;
+			this.stepsNeeded = diagonal ? 6 : 4;
+			this.stepsTaken = 0;
+			this.takeStep();
+		}
+		takeStep(tick) {
+			this.stepsTaken += 1;
+			let distance = this.stepsTaken / this.stepsNeeded;
+			var newPos = {
+				x: this.persistent.position.x + this.movingTo.x * distance,
+				y: this.persistent.position.y + this.movingTo.y * distance
+			};
+			if (distance == 1) {
+				this.setPosition(newPos);
+			} else {
+				this.event.fire("positionChange", newPos);
+			}
+		}
 		setPosition(d) {
 			console.log("CREATURE LOC BEING SET TO", d);
 			// TODO: generalize observables!
@@ -117,10 +144,22 @@
 				console.log("I GOT WHERE I WAS GOING");
 				this.clearDestination();
 			}
+			this.movingTo = null;
+			this.stepsTaken = this.stepsNeeded = 0;
 			this.event.fire("positionChange", this.persistent.position);
 		}
 		onPositionChange(handler) {
 			this.event.on("positionChange", handler);
+		}
+		// Return true if we are ready to start moving into a new cell
+		getMovingStatus(tick) {
+			if (this.movingTo) {
+				return "moving";
+			}
+			if (this.getDestination() && this.movingTo == null) {
+				return "ready";
+			}
+			return "resting";
 		}
 		getCreatureType() {
 			return this.persistent.race;

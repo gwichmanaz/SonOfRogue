@@ -11,7 +11,7 @@
 	let DemoFighter = require('./DemoFighter.es6');
 	let EventBus = require('./EventBus.es6');
 
-	let GAME_CLOCK_RESOLUTION = 500;
+	let GAME_CLOCK_RESOLUTION = 100;
 
 	let base = {
 		// id's of all my levels
@@ -23,7 +23,7 @@
 		constructor(id = false, init={}) {
 			super(id, init, base);
 			this.clock = new Clock({ resolution: GAME_CLOCK_RESOLUTION });
-			this.clock.tick(() => { this.clockAction(); });
+			this.clock.tick((ticks) => { this.clockAction(ticks); });
 			this.event = new EventBus();
 			this.event.on("setDestination", (p) => {
 				let hero = this.getActor();
@@ -35,9 +35,9 @@
 				}
 			});
 		}
-		clockAction() {
+		clockAction(ticks) {
 			// For now, just moving
-			this.level && this.level.moveCreatures();
+			this.level && this.level.moveCreatures(ticks);
 		}
 		startNewGame() {
 			this.createParty().then(() => {
