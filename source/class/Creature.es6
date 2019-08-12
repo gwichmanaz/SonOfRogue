@@ -1,3 +1,7 @@
+/**
+ * Abstract superclass for anything that moves about the dungeon on its own accord
+ * including monsters (controlled by computer AI) and explorers (controlled by commands from User Interface)
+ */
 {
 	const REST_DELTA = {
 		x: 0,
@@ -201,6 +205,12 @@
 				return this.persistent.destination;
 			}
 			return null;
+		}
+		/**
+		 * override in subclasses, this runs once per clock tick per creature, allows the creature to decide
+		 * what to do next.
+		 */
+		think() {
 		}
 	};
 }

@@ -72,7 +72,7 @@
 			this.handlers[eventName].push(handler);
 			// If the event has already fired, call the handler right back, fixes late listener problems
 			if (refire && this.payloads[eventName]) {
-				handler(payload);
+				handler(this.payloads[eventName]);
 			}
 		}
 		/**

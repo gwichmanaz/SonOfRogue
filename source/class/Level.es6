@@ -48,6 +48,13 @@
 			this.creatures.push(creature);
 		}
 
+		clockAction(tick) {
+			// Let all the creatures think a thought
+			this.creatures.forEach((c) => c.think(tick));
+			// Move all the creatures that want to move
+			this.moveCreatures(tick);
+		}
+
 		moveCreatures(tick) {
 			// TODO: deal with initiative and various speeds and all that.  For now, we're just moving the hero about
 			this.creatures.forEach(this.moveCreature.bind(this, tick));

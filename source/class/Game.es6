@@ -35,9 +35,8 @@
 				}
 			});
 		}
-		clockAction(ticks) {
-			// For now, just moving
-			this.level && this.level.moveCreatures(ticks);
+		clockAction(tick) {
+			this.level && this.level.clockAction(tick);
 		}
 		startNewGame() {
 			this.createParty().then(() => {
