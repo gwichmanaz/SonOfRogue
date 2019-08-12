@@ -16,7 +16,8 @@
 				entry: {
 					x: undefined,
 					y: undefined
-				}
+				},
+				bus: undefined
 			};
 		}
 		getCell(cellType, cellState) {

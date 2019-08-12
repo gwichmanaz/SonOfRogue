@@ -15,6 +15,20 @@
 	// The twelve possible room-to-room connections
 	const CONNECTIONS = ["01","12","03","14","25","34","45","36","47","58","67","78"];
 
+	function none(room) {
+		return true;
+	}
+
+	function not(f) {
+		return function(arg) {
+			return !f(arg);
+		}
+	}
+
+	function skinny(room) {
+		return room.isSkinny;
+	}
+
 	/**
 	 * If we can find our way from this room to a room already marked as connected,
 	 *  mark this room as connected and return true
@@ -244,8 +258,8 @@
 				fromRoom.connected = toRoom.connected = true;
 			}
 		}
-		__pickRandomRoom() {
-			return this.rng.randomEntry(this.rooms);
+		__pickRandomRoom(restrictions = none) {
+			return this.rng.randomEntry(this.rooms.filter(restrictions));
 		}
 		__pickRandomPosition(room) {
 			room = room || this.__pickRandomRoom();
@@ -256,7 +270,7 @@
 			};
 		}
 		__makeEntry() {
-			var room = this.__pickRandomRoom();
+			var room = this.__pickRandomRoom(not(skinny));
 			room.safe = true;
 			// TODO: Make beds in each corner
 			return this.__pickRandomPosition(room);

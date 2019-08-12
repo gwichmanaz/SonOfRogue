@@ -61,12 +61,19 @@
 		}
 		/**
 		 * add a handler for an event
+		 * @eventName {String} the name of the event to listen for
+		 * @handler {Function} a callback function to handle the event (will be sent a payload if there is one)
+		 * @refire {boolean} {optional} set to false IF you don't want to have the last event re-fired
 		 */
-		on(eventName, handler) {
+		on(eventName, handler, refire = true) {
 			// make sure we replace if called multiple
 			this.off(eventName, handler);
 			this.handlers[eventName] = this.handlers[eventName] || [];
 			this.handlers[eventName].push(handler);
+			// If the event has already fired, call the handler right back, fixes late listener problems
+			if (refire && this.payloads[eventName]) {
+				handler(payload);
+			}
 		}
 		/**
 		 * remove a handler for an event
@@ -98,7 +105,6 @@
 		}
 		/*
 		 * replay the most recent firing of this event, or if it hasn't fired at all yet, wait for it
-		 * (fixes "late listener" problems)
 		 *
 		 * handler: optional callback function, but can also be used in promise mode
 		 *

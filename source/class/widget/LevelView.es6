@@ -6,6 +6,10 @@ const ARTIFACT_ZINDEX = 1;
 const CREATURE_ZINDEX= 2;
 
 module.exports = class LevelView extends Widget {
+	/**
+	 * Create a sprite for each memeber of the exploring party
+	 * @party {Array} of creatures
+	 */
 	setParty(party) {
 		party.forEach((member) => {
 			const sprite = this.display.getSpriteForCreature(member);

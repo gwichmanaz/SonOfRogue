@@ -26,6 +26,9 @@
 				var level = LevelManager.generateLevelMap(this.persistent.generatorType, this.persistent.mapSeed);
 				this.cells = level.cells;
 				this.entry = level.entry;
+				if (level.bus) {
+					level.bus.on("generateCreature", this.placeCreatureOnLevel.bind(this));
+				}
 			});
 		}
 
