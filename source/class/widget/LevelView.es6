@@ -1,11 +1,25 @@
+const Viewport = require("pixi-viewport");
 const PIXIUtils = require('../../object/PixiUtils.es6');
 const Widget = require('./Widget.es6');
+const Config = require('../../object/Config.es6');
 
 const MAP_ZINDEX = 0;
 const ARTIFACT_ZINDEX = 1;
 const CREATURE_ZINDEX= 2;
 
 module.exports = class LevelView extends Widget {
+	constructor (display, eventBus, props) {
+		super(display, eventBus, props);
+		this.viewport = new Viewport({
+			screenWidth: props.w,
+			screenHeight: props.h,
+			worldWidth: 1000,
+			worldHeight: 1000
+		});
+		this.viewport.drag().pinch().decelerate().bounce();
+		this.container.addChild(this.viewport);
+	}
+
 	setParty(party) {
 		party.forEach((member) => {
 			const sprite = this.display.getSpriteForCreature(member);
@@ -14,7 +28,7 @@ module.exports = class LevelView extends Widget {
 			member.onPositionChange(() => {
 				this.updatePosition(member, sprite);
 			});
-			this.container.addChild(sprite);
+			this.viewport.addChild(sprite);
 		});
 	}
 	updatePosition(creature, sprite) {
@@ -22,7 +36,7 @@ module.exports = class LevelView extends Widget {
 		sprite.x = creature.getPosition().x * 16;
 		sprite.y = creature.getPosition().y * 16;
 		// TODO: don't call this unless we really mean it.
-		this.container.ensureVisible(sprite.x, sprite.y, 16, 16);
+		this.viewport.ensureVisible(sprite.x, sprite.y, 16, 16);
 	}
 	setLevel(level) {
 		const {w, h} = level.getSize();
@@ -37,7 +51,7 @@ module.exports = class LevelView extends Widget {
 				if (cell.interactive) {
 					this.makeInteractive(cell, sprite, x, y);
 				}
-				this.container.addChild(sprite);
+				this.viewport.addChild(sprite);
 				cell.onStateChange(() => {
 					this.cellStateChanged(cell, sprite);
 				});

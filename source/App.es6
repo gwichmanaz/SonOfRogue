@@ -43,6 +43,7 @@ function load() {
 		// Until we get a settings UI, turn sound off with test.html?sound=off
 		SoundManager.masterSwitch(valueFromUrl("sound") != "off");
 		Display.setGame(game);
+		document.getElementById('fontLoader').style.display = 'none'; // TODO: Add a proper font loader
 	});
 }
 

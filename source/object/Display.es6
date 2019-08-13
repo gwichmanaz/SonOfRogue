@@ -1,5 +1,9 @@
 import * as PIXI from 'pixi.js';
 const LevelView = require('../class/widget/LevelView.es6');
+const MessageBar = require('../class/widget/MessageBar.es6');
+const BorderedBox = require('../class/widget/BorderedBox.es6');
+const DepthIndicator = require('../class/widget/DepthIndicator.es6');
+import Config from './Config.es6';
 
 const TEXTURES = [
 	// DUNGEON SPRITES
@@ -18,7 +22,7 @@ const TEXTURES = [
 module.exports = {
 	init() {
 		this.widgets = {};
-		this.app = new PIXI.Application({width: 600, height: 400 });
+		this.app = new PIXI.Application({width: Config.gameWidth, height: Config.gameHeight });
 		document.body.appendChild(this.app.view);
 		return this.__loadTextures().then(() => this.__initUI());
 	},
@@ -31,7 +35,10 @@ module.exports = {
 	},
 
 	__initUI () {
-		this.widgets.levelView = new LevelView(this, this.event);
+		this.widgets.levelView = new LevelView(this, this.event, {x: 0, y: 0, w: Config.gameWidth, h: Config.stackLayout.viewport});
+		this.widgets.messageBar = new MessageBar(this, this.event, {x: 0, y: Config.stackLayout.viewport, w: Config.gameWidth, h: Config.stackLayout.messageBox});
+		this.widgets.footer = new BorderedBox(this, this.event, {x: 0, y: Config.stackLayout.viewport + Config.stackLayout.messageBox, w: Config.gameWidth, h: Config.stackLayout.lowerBox});
+		this.widgets.depthIndicator = new DepthIndicator(this, this.event, {x: (Config.gameWidth / 2) - 31, y: 24, w: 62, h: 15}, this.widgets.footer);
 	},
 
 	getTextureForCell(cell) {
