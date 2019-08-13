@@ -94,15 +94,10 @@ module.exports = {
 		this.event = game.event;
 		this.event.on("gameReady", () => {
 			this.setLevel(game.getLevel());
-			this.setParty(game.getParty());
 		});
 	},
 
 	setLevel(level) {
 		this.widgets.levelView.setLevel(level);
-	},
-
-	setParty(party) {
-		this.widgets.levelView.setParty(party);
 	},
 }

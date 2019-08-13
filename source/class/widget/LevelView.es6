@@ -31,7 +31,7 @@ module.exports = class LevelView extends Widget {
 	}
 	// Makes sure this sprite is visible within the view
 	scrollToSprite(sprite) {
-		this.container.ensureVisible(sprite.x, sprite.y, CELL_WIDTH, CELL_HEIGHT);
+		this.viewport.ensureVisible(sprite.x, sprite.y, CELL_WIDTH, CELL_HEIGHT);
 	}
 	setCreature(creature) {
 		const sprite = this.display.getSpriteForCreature(creature);
@@ -41,9 +41,9 @@ module.exports = class LevelView extends Widget {
 			this.updatePosition(creature, sprite, pos);
 		});
 		creature.onDemise(() => {
-			this.container.removeChild(sprite);
+			this.viewport.removeChild(sprite);
 		});
-		this.container.addChild(sprite);
+		this.viewport.addChild(sprite);
 	}
 	setLevel(level) {
 		const {w, h} = level.getSize();
@@ -64,6 +64,8 @@ module.exports = class LevelView extends Widget {
 				});
 			}
 		}
+		this.viewport.worldWidth = w * CELL_WIDTH;
+		this.viewport.worldHeight = h * CELL_HEIGHT;
 		// Build sprites for all the creatures currently on the level
 		level.getCreatures().forEach(this.setCreature.bind(this));
 
