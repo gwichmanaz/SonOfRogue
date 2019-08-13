@@ -17,11 +17,14 @@
 					x: undefined,
 					y: undefined
 				},
-				bus: undefined
+				bus: undefined,
+				generator: this
 			};
 		}
 		getCell(cellType, cellState) {
 			return MapCell.getMapCell(cellType, cellState);
+		}
+		clockAction(tick) {
 		}
 	};
 }

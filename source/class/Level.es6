@@ -29,6 +29,9 @@
 				if (level.bus) {
 					level.bus.on("generateCreature", this.placeCreatureOnLevel.bind(this));
 				}
+				if (level.generator) {
+					this.generator = level.generator;
+				}
 			});
 		}
 
@@ -50,9 +53,12 @@
 
 		clockAction(tick) {
 			// Let all the creatures think a thought
-			this.creatures.forEach((c) => c.think(tick));
+			this.creatures.forEach((c) => c.think(tick, this));
 			// Move all the creatures that want to move
 			this.moveCreatures(tick);
+			if (this.generator && this.generator.clockAction) {
+				this.generator.clockAction(tick);
+			}
 		}
 
 		moveCreatures(tick) {

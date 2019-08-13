@@ -63,6 +63,10 @@
 			this.rng = this.rng || new RNG();
 			return this.rng.roll(dice, sides);
 		}
+		between(lo, hi) {
+			this.rng = this.rng || new RNG();
+			return this.rng.between(lo, hi);
+		}
 		/**
 		 * @return the direction this creature is facing: left, right, front, back
 		 */
@@ -210,7 +214,7 @@
 		 * override in subclasses, this runs once per clock tick per creature, allows the creature to decide
 		 * what to do next.
 		 */
-		think() {
+		think(tick, level) {
 		}
 	};
 }

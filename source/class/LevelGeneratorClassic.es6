@@ -1,6 +1,7 @@
 {
 	let LevelGenerator = require('./LevelGenerator.es6');
 	let RNG = require('./RNG.es6');
+	let EventBus = require('./EventBus.es6');
 	const CLASSIC_WIDTH = 110;
 	const CLASSIC_HEIGHT = 55;
 	const PLACEMENT_HEIGHT = Math.floor(CLASSIC_HEIGHT / 3);
@@ -76,6 +77,7 @@
 			this.cells = [];
 			this.rooms = [];
 			this.rng = new RNG(mapSeed);
+			this.bus = new EventBus();
 			// Start with all void
 			for (let x = 0; x < CLASSIC_WIDTH; x++) {
 				for (let y = 0; y < CLASSIC_HEIGHT; y++) {
@@ -118,8 +120,13 @@
 			console.log("BUILT", walk, "CONNECTIONS");
 			return {
 				cells: this.cells,
-				entry: this.__makeEntry()
+				entry: this.__makeEntry(),
+				bus: this.bus,
+				generator: this
 			};
+		}
+		clockAction(tick) {
+			// Maybe generate random monsters someday
 		}
 		/**
 		 * build a room in "nonant" at x,y
