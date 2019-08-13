@@ -7,6 +7,7 @@
 	};
 	let Persist = require('./Persist.es6');
 	let LevelManager = require('../object/LevelManager.es6');
+	let EventBus = require('./EventBus.es6');
 	module.exports = class Level extends Persist {
 		constructor (id, dflt) {
 			// Persist my map seed so I always generate the same map
@@ -16,6 +17,7 @@
 			super(id, dflt, base);
 			this.generateMap();
 			this.creatures = [];
+			this.bus = new EventBus();
 		}
 
 		/**
@@ -49,6 +51,7 @@
 
 		placeCreatureOnLevel(creature) {
 			this.creatures.push(creature);
+			this.bus.fire("addCreature", creature);
 		}
 
 		clockAction(tick) {
@@ -153,6 +156,10 @@
 				w: this.cells.length,
 				h: this.cells[0].length
 			}
+		}
+
+		getCreatures() {
+			return this.creatures;
 		}
 	};
 }

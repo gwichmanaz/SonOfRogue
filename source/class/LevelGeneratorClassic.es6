@@ -2,6 +2,7 @@
 	let LevelGenerator = require('./LevelGenerator.es6');
 	let RNG = require('./RNG.es6');
 	let EventBus = require('./EventBus.es6');
+	let DemoSkeleton = require('./creatures/DemoSkeleton.es6');
 	const CLASSIC_WIDTH = 110;
 	const CLASSIC_HEIGHT = 55;
 	const PLACEMENT_HEIGHT = Math.floor(CLASSIC_HEIGHT / 3);
@@ -27,7 +28,23 @@
 	}
 
 	function skinny(room) {
-		return room.isSkinny;
+		return room.skinny;
+	}
+
+	function safe(room) {
+		return room.safe;
+	}
+
+	function roomMatches(template, room) {
+		var fail = Object.keys(template).find((k) => template[k] != room[k]);
+		console.log("Room matches", template, room, fail);
+		return !fail;
+	}
+
+	function matches(template) {
+		return function (room) {
+			return roomMatches(template, room);
+		}
 	}
 
 	/**
@@ -126,7 +143,21 @@
 			};
 		}
 		clockAction(tick) {
+			if (!this.demoMonster) {
+				this.demoMonster = this.__makeDemoMonster();
+			}
 			// Maybe generate random monsters someday
+		}
+		__makeDemoMonster() {
+			var room = this.__pickRandomRoom(matches({ safe: false, skinny: false }));
+			var pos = this.__pickRandomPosition(room);
+			var demoSkeleton = new DemoSkeleton();
+			demoSkeleton.ready.then(() => {
+				demoSkeleton.setPosition(pos);
+				console.log("Putting monster in this room", room, pos, demoSkeleton);
+				this.bus.fire("generateCreature", demoSkeleton);
+			});
+			return demoSkeleton;
 		}
 		/**
 		 * build a room in "nonant" at x,y
@@ -148,9 +179,6 @@
 					let cellType = "floor";
 					let cellState = isSkinny ? 'cobblestone' : 'tile';
 					if (x == firstX || x == lastX || y == firstY || y == lastY) {
-						// TODO: hallways will have walls, so this can be walls for all rooms, but for now
-						// be like original rogue and make them void
-						//cellType = isSkinny ? "void" : "wall";
 						cellType = "wall";
 						cellState = undefined;
 					}
@@ -158,6 +186,7 @@
 				}
 			}
 			this.rooms[id] = {
+				safe: false,
 				skinny: isSkinny,
 				connected: false,
 				id: id,
@@ -278,6 +307,7 @@
 		}
 		__makeEntry() {
 			var room = this.__pickRandomRoom(not(skinny));
+			console.log("Making safe room", room);
 			room.safe = true;
 			// TODO: Make beds in each corner
 			return this.__pickRandomPosition(room);

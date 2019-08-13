@@ -51,7 +51,7 @@
 	module.exports = class Creature extends Persist {
 		constructor(id = false, init={}) {
 			super(id, init, base);
-			this.event = new EventBus();
+			this.bus = new EventBus();
 			// Creature's next position on the map
 			this.movingTo = null;
 			this.step = 0;
@@ -152,7 +152,7 @@
 				this.setPosition(newPos);
 			} else {
 				// I am partway between old and new positions, fire the fractional position change so UI will show movement
-				this.event.fire("positionChange", newPos);
+				this.bus.fire("positionChange", newPos);
 			}
 		}
 		/**
@@ -174,10 +174,13 @@
 			this.movingTo = null;
 			this.stepsTaken = this.stepsNeeded = 0;
 
-			this.event.fire("positionChange", this.persistent.position);
+			this.bus.fire("positionChange", this.persistent.position);
 		}
 		onPositionChange(handler) {
-			this.event.on("positionChange", handler);
+			this.bus.on("positionChange", handler);
+		}
+		onDemise(handler) {
+			this.bus.on("demise", handler);
 		}
 		/**
 		 * What is my moving status?

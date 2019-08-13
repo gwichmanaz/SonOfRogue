@@ -33,6 +33,7 @@ const TEXTURES = [
 	{ id: 'Human', file: 'asset/heroSprites/standin.png'},
 
 	// CREATURE SPRITES
+	{ id: 'Skeleton', file: 'asset/monsterSprites/demoSkeleton.png'},
 ];
 
 module.exports = {

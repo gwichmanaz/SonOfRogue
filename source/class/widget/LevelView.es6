@@ -4,30 +4,32 @@ const Widget = require('./Widget.es6');
 const MAP_ZINDEX = 0;
 const ARTIFACT_ZINDEX = 1;
 const CREATURE_ZINDEX= 2;
+const CELL_WIDTH = 16;
+const CELL_HEIGHT = 16;
 
 module.exports = class LevelView extends Widget {
-	/**
-	 * Create a sprite for each memeber of the exploring party
-	 * @party {Array} of creatures
-	 */
-	setParty(party) {
-		party.forEach((member) => {
-			const sprite = this.display.getSpriteForCreature(member);
-			sprite.zIndex = CREATURE_ZINDEX;
-			this.updatePosition(member, sprite);
-			member.onPositionChange((pos) => {
-				this.updatePosition(member, sprite, pos);
-			});
-			this.container.addChild(sprite);
-		});
-	}
 	updatePosition(creature, sprite, pos) {
 		pos = pos || creature.getPosition();
-		sprite.x = pos.x * 16;
-		sprite.y = pos.y * 16;
-		// Makes sure this sprite is visible within the view
+		sprite.x = pos.x * CELL_WIDTH;
+		sprite.y = pos.y * CELL_HEIGHT;
 		// TODO: don't call this unless we really mean it.
-		this.container.ensureVisible(sprite.x, sprite.y, 16, 16);
+		// this.container.ensureVisible(sprite.x, sprite.y, CELL_WIDTH, CELL_HEIGHT);
+	}
+	// Makes sure this sprite is visible within the view
+	scrollToSprite(sprite) {
+		this.container.ensureVisible(sprite.x, sprite.y, CELL_WIDTH, CELL_HEIGHT);
+	}
+	setCreature(creature) {
+		const sprite = this.display.getSpriteForCreature(creature);
+		sprite.zIndex = CREATURE_ZINDEX;
+		this.updatePosition(creature, sprite);
+		creature.onPositionChange((pos) => {
+			this.updatePosition(creature, sprite, pos);
+		});
+		creature.onDemise(() => {
+			this.container.removeChild(sprite);
+		});
+		this.container.addChild(sprite);
 	}
 	setLevel(level) {
 		const {w, h} = level.getSize();
@@ -35,8 +37,8 @@ module.exports = class LevelView extends Widget {
 			for (let y = 0; y < h; y++) {
 				const cell = level.getCellAt(x, y);
 				const sprite = this.display.getSpriteForCell(level, cell, x, y);
-				sprite.x = x * 16;
-				sprite.y = y * 16;
+				sprite.x = x * CELL_WIDTH;
+				sprite.y = y * CELL_HEIGHT;
 				sprite.name = `${level.id}_${x}_${y}`;
 				sprite.zIndex = MAP_ZINDEX;
 				if (cell.interactive) {
@@ -48,6 +50,11 @@ module.exports = class LevelView extends Widget {
 				});
 			}
 		}
+		// Build sprites for all the creatures currently on the level
+		level.getCreatures().forEach(this.setCreature.bind(this));
+
+		// And build a new sprite for any new creature that might show up.
+		level.bus.on("addCreature", this.setCreature.bind(this));
 	}
 	makeInteractive(cell, sprite, x, y) {
 		var display = this.display;
