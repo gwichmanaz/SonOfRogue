@@ -1,0 +1,77 @@
+{
+	"MOVE": {
+		"type": "command",
+		"event": "COMMAND_MOVE",
+		"tip": "Tip for the move button"
+	},
+	"SELECT": {
+		"type": "mode",
+		"event": "SELECT_MODE",
+		"tip": "Select item(s)"
+	},
+	"PAUSE": {
+		"type": "state",
+		"event": "TOGGLE_PAUSED",
+		"tip": "Pause real-time movement"
+	},
+	"PLAY": {
+		"type": "state",
+		"event": "TOGGLE_PAUSED",
+		"tip": "Restart real-time movement"
+	},
+	"OPTIONS": {
+		"type": "modal",
+		"key": "ESC",
+		"event": "OPEN_OPTIONS",
+		"tip": "View and change game options"
+	},
+	"INVENTORY": {
+		"type": "modal",
+		"key": "i",
+		"event": "OPEN_INVENTORY",
+		"tip": "View the items you are carrying"
+	},
+	"USE": {
+		"type": "modal",
+		"event": "USE_ITEM",
+		"tip": "Use an item"
+	},
+	"REST": {
+		"type": "command",
+		"event": "COMMAND_REST",
+		"tip": "Rest to regain energy",
+		"key": " ",
+	},
+	"ACTION": {
+		"tip": "Select an action",
+		"type": "menu",
+		"entries": {
+		}
+	},
+	"M.ACTION": {
+		"tip": "Select a Miscellaneous Action",
+		"type": "menu",
+		"entries": {
+		}
+	},
+	"B.ACTION": {
+		"tip": "Select a bonus action",
+		"type": "menu",
+		"entries": {
+		}
+	},
+	"REACTION": {
+		"tip": "Select a reaction",
+		"type": "menu",
+		"entries": {
+		}
+	},
+	"LAND Spd": {
+		"event": "SPEED_DISPLAY",
+		"type": "menu",
+		"entries": {
+		}
+	},
+	"SPEED DISPLAY": {
+		"type": "display"
+	}

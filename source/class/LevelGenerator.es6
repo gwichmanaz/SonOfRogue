@@ -16,11 +16,15 @@
 				entry: {
 					x: undefined,
 					y: undefined
-				}
+				},
+				bus: undefined,
+				generator: this
 			};
 		}
-		getCell(typ) {
-			return MapCell.getMapCell(typ);
+		getCell(cellType, cellState) {
+			return MapCell.getMapCell(cellType, cellState);
+		}
+		clockAction(tick) {
 		}
 	};
 }

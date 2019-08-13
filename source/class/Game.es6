@@ -11,7 +11,7 @@
 	let DemoFighter = require('./DemoFighter.es6');
 	let EventBus = require('./EventBus.es6');
 
-	let GAME_CLOCK_RESOLUTION = 500;
+	let GAME_CLOCK_RESOLUTION = 100;
 
 	let base = {
 		// id's of all my levels
@@ -23,12 +23,11 @@
 		constructor(id = false, init={}) {
 			super(id, init, base);
 			this.clock = new Clock({ resolution: GAME_CLOCK_RESOLUTION });
-			this.clock.tick(() => { this.clockAction(); });
+			this.clock.tick((ticks) => { this.clockAction(ticks); });
 			this.event = new EventBus();
 			this.event.on("setDestination", (p) => {
-				if (this.party && this.party[this.hero]) {
-					this.party[this.hero].setDestination(p);
-				}
+				let hero = this.getActor();
+				hero.setDestination(p);
 			});
 			this.ready.then(() => {
 				if (this.persistent.levels.length == 0) {
@@ -36,9 +35,8 @@
 				}
 			});
 		}
-		clockAction() {
-			// For now, just moving
-			this.level && this.level.moveCreatures();
+		clockAction(tick) {
+			this.level && this.level.clockAction(tick);
 		}
 		startNewGame() {
 			this.createParty().then(() => {
@@ -56,7 +54,11 @@
 		createParty() {
 			if (!this.party) {
 				this.party = [];
-				this.party.push(new DemoFighter());
+				let demoFighter = new DemoFighter();
+				demoFighter.onPositionChange(() => {
+					this.event.fire("heroMoving");
+				});
+				this.party.push(demoFighter);
 				this.hero = 0; // index of the party member who is currently being controlled
 			}
 			return Promise.resolve();
@@ -76,6 +78,15 @@
 		}
 		getParty() {
 			return this.party;
+		}
+		/**
+		 * Get the creature who is currently acting.  For now it's always the hero
+		 */
+		getActor() {
+			if (this.party) {
+				return this.party[this.hero];
+			}
+			return null;
 		}
 		placePartyOnLevel() {
 			// TODO: Place party leader on entry square, and place others nearby in whatever spaces possible.

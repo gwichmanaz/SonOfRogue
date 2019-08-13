@@ -9,7 +9,7 @@ module.exports = class RNG {
 		this.mersenne = new MersenneTwister(seed);
 	}
 	/**
-	 * @return a random integer between @lo and @hi
+	 * @return a random integer between @lo and @hi inclusive
 	 * be forgiving if they get the order wrong
 	 */
 	between(lo, hi) {
@@ -89,6 +89,9 @@ module.exports = class RNG {
 	 * given an array of values, return one at random
 	 */
 	randomEntry(array) {
+		if (array.length < 1) {
+			return undefined;
+		}
 		return array[this.between(0, array.length -1)];
 	}
 }

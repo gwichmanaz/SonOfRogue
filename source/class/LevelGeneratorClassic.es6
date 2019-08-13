@@ -1,6 +1,8 @@
 {
 	let LevelGenerator = require('./LevelGenerator.es6');
 	let RNG = require('./RNG.es6');
+	let EventBus = require('./EventBus.es6');
+	let DemoSkeleton = require('./creatures/DemoSkeleton.es6');
 	const CLASSIC_WIDTH = 110;
 	const CLASSIC_HEIGHT = 55;
 	const PLACEMENT_HEIGHT = Math.floor(CLASSIC_HEIGHT / 3);
@@ -9,9 +11,41 @@
 	const MAX_ROOM_WIDTH = PLACEMENT_WIDTH - 3;
 	const MIN_ROOM_HEIGHT = 7;
 	const MIN_ROOM_WIDTH = 7;
+	const MAX_SKINNY_ROOMS = 3; // Maximum number of skinny rooms (rooms disguised as hallways)
+	const SKINNYROOM_CHANCE = 10; // one chance in X of a room being skinny
 
 	// The twelve possible room-to-room connections
 	const CONNECTIONS = ["01","12","03","14","25","34","45","36","47","58","67","78"];
+
+	function none(room) {
+		return true;
+	}
+
+	function not(f) {
+		return function(arg) {
+			return !f(arg);
+		}
+	}
+
+	function skinny(room) {
+		return room.skinny;
+	}
+
+	function safe(room) {
+		return room.safe;
+	}
+
+	function roomMatches(template, room) {
+		var fail = Object.keys(template).find((k) => template[k] != room[k]);
+		console.log("Room matches", template, room, fail);
+		return !fail;
+	}
+
+	function matches(template) {
+		return function (room) {
+			return roomMatches(template, room);
+		}
+	}
 
 	/**
 	 * If we can find our way from this room to a room already marked as connected,
@@ -60,6 +94,7 @@
 			this.cells = [];
 			this.rooms = [];
 			this.rng = new RNG(mapSeed);
+			this.bus = new EventBus();
 			// Start with all void
 			for (let x = 0; x < CLASSIC_WIDTH; x++) {
 				for (let y = 0; y < CLASSIC_HEIGHT; y++) {
@@ -69,9 +104,22 @@
 			}
 			// Build the rooms
 			let id = 0;
+			let numSkinny = 0;
 			for (let y = 0; y < 3; y++) {
 				for (let x = 0; x < 3; x++, id++) {
-					this.__buildRoom(id, x, y);
+					let w = 0, h = 0;
+					if (numSkinny < MAX_SKINNY_ROOMS) {
+						if (this.rng.between(1, SKINNYROOM_CHANCE) == 1) {
+							w = 1;
+						}
+						if (this.rng.between(1, SKINNYROOM_CHANCE) == 1) {
+							h = 1;
+						}
+						if (w || h) {
+							numSkinny++;
+						}
+					}
+					this.__buildRoom(id, x, y, w, h);
 				}
 			}
 
@@ -89,29 +137,57 @@
 			console.log("BUILT", walk, "CONNECTIONS");
 			return {
 				cells: this.cells,
-				entry: this.__makeEntry()
+				entry: this.__makeEntry(),
+				bus: this.bus,
+				generator: this
 			};
 		}
-		__buildRoom(id, x, y) {
+		clockAction(tick) {
+			if (!this.demoMonster) {
+				this.demoMonster = this.__makeDemoMonster();
+			}
+			// Maybe generate random monsters someday
+		}
+		__makeDemoMonster() {
+			var room = this.__pickRandomRoom(matches({ safe: false, skinny: false }));
+			var pos = this.__pickRandomPosition(room);
+			var demoSkeleton = new DemoSkeleton();
+			demoSkeleton.ready.then(() => {
+				demoSkeleton.setPosition(pos);
+				console.log("Putting monster in this room", room, pos, demoSkeleton);
+				this.bus.fire("generateCreature", demoSkeleton);
+			});
+			return demoSkeleton;
+		}
+		/**
+		 * build a room in "nonant" at x,y
+		 * pass in a width/height, or pass 0 for either to get a random size
+		 */
+		__buildRoom(id, x, y, w, h) {
 			let pX = x * PLACEMENT_WIDTH, pY = y * PLACEMENT_HEIGHT;
-			let roomHeight = this.rng.between(MIN_ROOM_HEIGHT, MAX_ROOM_HEIGHT);
-			let roomWidth = this.rng.between(MIN_ROOM_WIDTH, MAX_ROOM_WIDTH);
-			let spareWidth = (PLACEMENT_WIDTH - roomWidth) - 2;
-			let spareHeight = (PLACEMENT_HEIGHT - roomHeight) - 2;
+			let roomWidth = w || this.rng.between(MIN_ROOM_WIDTH, MAX_ROOM_WIDTH);
+			let roomHeight = h || this.rng.between(MIN_ROOM_HEIGHT, MAX_ROOM_HEIGHT);
+			let spareWidth = (PLACEMENT_WIDTH - roomWidth) - 3;
+			let spareHeight = (PLACEMENT_HEIGHT - roomHeight) - 3;
 			let firstX = this.rng.between(pX, pX + spareWidth);
 			let firstY = this.rng.between(pY, pY + spareHeight);
+			let isSkinny = roomWidth == 1 || roomHeight == 1;
 			console.log("Creating", roomWidth, "by", roomHeight, "room at", firstX, firstY);
-			let lastX = firstX + roomWidth, lastY = firstY + roomHeight;
+			let lastX = firstX + roomWidth + 1, lastY = firstY + roomHeight + 1;
 			for (let x = firstX; x <= lastX; x++) {
 				for (let y = firstY; y <= lastY; y++) {
 					let cellType = "floor";
+					let cellState = isSkinny ? 'cobblestone' : 'tile';
 					if (x == firstX || x == lastX || y == firstY || y == lastY) {
 						cellType = "wall";
+						cellState = undefined;
 					}
-					this.cells[x][y] = this.getCell(cellType);
+					this.cells[x][y] = this.getCell(cellType, cellState);
 				}
 			}
 			this.rooms[id] = {
+				safe: false,
+				skinny: isSkinny,
 				connected: false,
 				id: id,
 				row: y,
@@ -134,45 +210,82 @@
 			this.__buildCorridor(this.rooms[fromId], this.rooms[toId]);
 		}
 		__buildCorridor(fromRoom, toRoom) {
+			var firstX, firstY, lastX, lastY;
+			var fromX, fromY, toX, toY;
+			let replaceVoidWithWall = (x, y) => {
+				if (this.cells[x][y].cellType == "void") {
+					this.cells[x][y] = this.getCell("wall");
+				}
+			}
 			if (fromRoom.row == toRoom.row) {
 				// same row, corridor will be horizontal
-				let firstX = fromRoom.right;
-				let fromY = this.rng.between(fromRoom.top + 1, fromRoom.bottom - 1);
-				let lastX = toRoom.left;
-				let toY = this.rng.between(toRoom.top + 1, toRoom.bottom - 1);
-				let firstY = Math.min(fromY, toY);
-				let lastY = Math.max(fromY, toY);
+				fromX = firstX = fromRoom.right;
+				fromY = this.rng.between(fromRoom.top + 1, fromRoom.bottom - 1);
+				toX = lastX = toRoom.left;
+				toY = this.rng.between(toRoom.top + 1, toRoom.bottom - 1);
+				firstY = Math.min(fromY, toY);
+				lastY = Math.max(fromY, toY);
 				let bend = this.rng.between(firstX+1, lastX-1);
-				for (let walk = firstX; walk < bend; walk++) {
-					this.cells[walk][fromY] = this.getCell("floor");
+				for (let walk = firstX; walk <= bend; walk++) {
+					replaceVoidWithWall(walk, fromY - 1);
+					this.cells[walk][fromY] = this.getCell("floor", "cobblestone");
+					replaceVoidWithWall(walk, fromY + 1);
 				}
+				replaceVoidWithWall(bend - 1, firstY - 1);
+				replaceVoidWithWall(bend + 1, firstY - 1);
 				for (let walk = firstY; walk <= lastY; walk++) {
-					this.cells[bend][walk] = this.getCell("floor");
+					replaceVoidWithWall(bend - 1, walk);
+					this.cells[bend][walk] = this.getCell("floor", "cobblestone");
+					replaceVoidWithWall(bend + 1, walk);
 				}
+				replaceVoidWithWall(bend - 1, lastY + 1);
+				replaceVoidWithWall(bend + 1, lastY + 1);
 				for (let walk = bend; walk <= lastX; walk++) {
-					this.cells[walk][toY] = this.getCell("floor");
+					replaceVoidWithWall(walk, toY - 1);
+					this.cells[walk][toY] = this.getCell("floor", "cobblestone");
+					replaceVoidWithWall(walk, toY + 1);
 				}
 			} else if (fromRoom.column == toRoom.column) {
 				// same column, corridor will be vertical
-				let firstY = fromRoom.bottom;
-				let fromX = this.rng.between(fromRoom.left + 1, fromRoom.right - 1);
-				let lastY = toRoom.top;
-				let toX = this.rng.between(toRoom.left + 1, toRoom.right - 1);
-				let firstX = Math.min(fromX, toX);
-				let lastX = Math.max(fromX, toX);
+				fromY = firstY = fromRoom.bottom;
+				fromX = this.rng.between(fromRoom.left + 1, fromRoom.right - 1);
+				toY = lastY = toRoom.top;
+				toX = this.rng.between(toRoom.left + 1, toRoom.right - 1);
+				firstX = Math.min(fromX, toX);
+				lastX = Math.max(fromX, toX);
 				let bend = this.rng.between(firstY+1, lastY-1);
-				for (let walk = firstY; walk < bend; walk++) {
-					this.cells[fromX][walk] = this.getCell("floor");
+				for (let walk = firstY; walk <= bend; walk++) {
+					replaceVoidWithWall(fromX - 1, walk);
+					this.cells[fromX][walk] = this.getCell("floor", "cobblestone");
+					replaceVoidWithWall(fromX + 1, walk);
 				}
+				replaceVoidWithWall(firstX - 1, bend - 1);
+				replaceVoidWithWall(firstX - 1, bend + 1);
 				for (let walk = firstX; walk <= lastX; walk++) {
-					this.cells[walk][bend] = this.getCell("floor");
+					replaceVoidWithWall(walk, bend - 1);
+					this.cells[walk][bend] = this.getCell("floor", "cobblestone");
+					replaceVoidWithWall(walk, bend + 1);
 				}
+				replaceVoidWithWall(lastX + 1, bend - 1);
+				replaceVoidWithWall(lastX + 1, bend + 1);
 				for (let walk = bend; walk <= lastY; walk++) {
-					this.cells[toX][walk] = this.getCell("floor");
+					replaceVoidWithWall(toX - 1, walk);
+					this.cells[toX][walk] = this.getCell("floor", "cobblestone");
+					replaceVoidWithWall(toX + 1, walk);
 				}
 			} else {
 				console.log("can't build a corridor between these rooms", fromRoom, toRoom);
 				return;
+			}
+			if (!fromRoom.skinny) {
+				let fromDoor = this.getCell("door");
+				fromDoor.initialize(1, fromX, fromY, "closed");
+				this.cells[fromX][fromY] = fromDoor;
+			}
+			if (!toRoom.skinny) {
+				let toDoor = this.getCell("door");
+				toDoor.initialize(1, toX, toY, "closed");
+				this.cells[toX][toY] = toDoor;
 			}
 			fromRoom.exits.push(toRoom.id);
 			toRoom.exits.push(fromRoom.id);
@@ -181,8 +294,8 @@
 				fromRoom.connected = toRoom.connected = true;
 			}
 		}
-		__pickRandomRoom() {
-			return this.rng.randomEntry(this.rooms);
+		__pickRandomRoom(restrictions = none) {
+			return this.rng.randomEntry(this.rooms.filter(restrictions));
 		}
 		__pickRandomPosition(room) {
 			room = room || this.__pickRandomRoom();
@@ -193,7 +306,8 @@
 			};
 		}
 		__makeEntry() {
-			var room = this.__pickRandomRoom();
+			var room = this.__pickRandomRoom(not(skinny));
+			console.log("Making safe room", room);
 			room.safe = true;
 			// TODO: Make beds in each corner
 			return this.__pickRandomPosition(room);

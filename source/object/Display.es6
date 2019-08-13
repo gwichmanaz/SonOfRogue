@@ -7,8 +7,28 @@ import Config from './Config.es6';
 
 const TEXTURES = [
 	// DUNGEON SPRITES
-	{ id: 'wall', file: 'asset/dungeonSprites/Stone.png'},
-	{ id: 'floor', file: 'asset/dungeonSprites/Gravel.png'},
+	{ id: 'wall', file: 'asset/dungeonSprites/Wall-X.png'},
+	{ id: 'wall-', file: 'asset/dungeonSprites/Wall-X.png'},
+	{ id: 'wall-b', file: 'asset/dungeonSprites/Wall-b.png'},
+	{ id: 'wall-br', file: 'asset/dungeonSprites/Wall-br.png'},
+	{ id: 'wall-l', file: 'asset/dungeonSprites/Wall-l.png'},
+	{ id: 'wall-lb', file: 'asset/dungeonSprites/Wall-lb.png'},
+	{ id: 'wall-lbr', file: 'asset/dungeonSprites/Wall-lbr.png'},
+	{ id: 'wall-lr', file: 'asset/dungeonSprites/Wall-lr.png'},
+	{ id: 'wall-r', file: 'asset/dungeonSprites/Wall-r.png'},
+	{ id: 'wall-t', file: 'asset/dungeonSprites/Wall-t.png'},
+	{ id: 'wall-tb', file: 'asset/dungeonSprites/Wall-tb.png'},
+	{ id: 'wall-tbr', file: 'asset/dungeonSprites/Wall-tbr.png'},
+	{ id: 'wall-tl', file: 'asset/dungeonSprites/Wall-tl.png'},
+	{ id: 'wall-tlb', file: 'asset/dungeonSprites/Wall-tlb.png'},
+	{ id: 'wall-tlbr', file: 'asset/dungeonSprites/Wall-tlbr.png'},
+	{ id: 'wall-tlr', file: 'asset/dungeonSprites/Wall-tlr.png'},
+	{ id: 'wall-tr', file: 'asset/dungeonSprites/Wall-tr.png'},
+	{ id: 'floor-brick', file: 'asset/dungeonSprites/Floor-Brick16.png'},
+	{ id: 'floor-cobblestone', file: 'asset/dungeonSprites/Floor-Cobblestone.png'},
+	{ id: 'floor-dirt', file: 'asset/dungeonSprites/Floor-Dirt16.png'},
+	{ id: 'floor-grass', file: 'asset/dungeonSprites/Floor-Grass16.png'},
+	{ id: 'floor-tile', file: 'asset/dungeonSprites/Floor-Tile16.png'},
 	{ id: 'void', file: 'asset/dungeonSprites/Void.png'},
 	{ id: 'door-closed', file: 'asset/dungeonSprites/Door-Closed.png'},
 	{ id: 'door-open', file: 'asset/dungeonSprites/Door-Open.png'},
@@ -17,6 +37,7 @@ const TEXTURES = [
 	{ id: 'Human', file: 'asset/heroSprites/standin.png'},
 
 	// CREATURE SPRITES
+	{ id: 'Skeleton', file: 'asset/monsterSprites/demoSkeleton.png'},
 ];
 
 module.exports = {
@@ -41,17 +62,21 @@ module.exports = {
 		this.widgets.depthIndicator = new DepthIndicator(this, this.event, {x: (Config.gameWidth / 2) - 31, y: 24, w: 62, h: 15}, this.widgets.footer);
 	},
 
-	getTextureForCell(cell) {
+	getTextureForCell(level, cell, x, y) {
 		var textureId = cell.cellType;
-		var cellState = cell.getState();
+		var cellState = cell.getState(level, x, y);
 		if (cellState) {
 			textureId += "-" + cellState;
 		}
-		return PIXI.loader.resources[textureId].texture;
+		if (PIXI.loader.resources[textureId]) {
+			return PIXI.loader.resources[textureId].texture;
+		}
+		throw new Error(`No texture loaded for ${textureId}`);
 	},
 
-	getSpriteForCell(cell) {
-		return new PIXI.Sprite(this.getTextureForCell(cell));
+	getSpriteForCell(level, cell, x, y) {
+		return new PIXI.Sprite(this.getTextureForCell(level, cell, x, y));
+		//return new PIXI.TilingSprite(this.getTextureForCell(level, cell, x, y), 16, 16);
 	},
 
 	getTextureForCreature(creature) {
