@@ -94,6 +94,7 @@
 			if (this.party && this.party[this.hero]) {
 				this.party[this.hero].setPosition(this.level.entry);
 				this.level.placeCreatureOnLevel(this.party[this.hero]);
+				this.party[this.hero].requestFocus();
 			}
 		}
 		restore () {

@@ -121,14 +121,22 @@
 			}
 			// If both moves are possible, choose 1
 			if (hmovePossible && vmovePossible) {
-				if (hvid === undefined) {
-					hvid = Math.random() > 0.5;
-				}
-				var even = position.x % 2 == position.y % 2;
-				if (hvid == even) {
+				if (hcell.cellType == "door") {
+					console.log("GOING THROUGH DOOR H");
 					vmovePossible = false;
-				} else {
+				} else if (vcell.cellType == "door") {
 					hmovePossible = false;
+					console.log("GOING THROUGH DOOR V");
+				} else {
+					if (hvid === undefined) {
+						hvid = Math.random() > 0.5;
+					}
+					var even = position.x % 2 == position.y % 2;
+					if (hvid == even) {
+						vmovePossible = false;
+					} else {
+						hmovePossible = false;
+					}
 				}
 			}
 			if (hmovePossible) {

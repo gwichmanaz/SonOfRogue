@@ -176,6 +176,13 @@
 
 			this.bus.fire("positionChange", this.persistent.position);
 		}
+		requestFocus() {
+			// Events need a payload if you want them to refire...
+			this.bus.fire("requestFocus", true);
+		}
+		onRequestFocus(handler) {
+			this.bus.on("requestFocus", handler, true);
+		}
 		onPositionChange(handler) {
 			this.bus.on("positionChange", handler);
 		}

@@ -26,12 +26,17 @@ module.exports = class LevelView extends Widget {
 		pos = pos || creature.getPosition();
 		sprite.x = pos.x * CELL_WIDTH;
 		sprite.y = pos.y * CELL_HEIGHT;
-		// TODO: don't call this unless we really mean it.
-		// this.container.ensureVisible(sprite.x, sprite.y, CELL_WIDTH, CELL_HEIGHT);
 	}
 	// Makes sure this sprite is visible within the view
 	scrollToSprite(sprite) {
 		this.viewport.ensureVisible(sprite.x, sprite.y, CELL_WIDTH, CELL_HEIGHT);
+	}
+	// Puts this sprite as close to center of view as possible
+	centerSprite(sprite) {
+		var halfWidth = (this.viewport.right - this.viewport.left - CELL_WIDTH) / 2,
+			halfHeight = (this.viewport.bottom - this.viewport.top - CELL_HEIGHT) / 2;
+		this.viewport.left = Math.max(0, sprite.x - halfWidth);
+		this.viewport.top = Math.max(0, sprite.y - halfHeight);
 	}
 	setCreature(creature) {
 		const sprite = this.display.getSpriteForCreature(creature);
@@ -39,6 +44,9 @@ module.exports = class LevelView extends Widget {
 		this.updatePosition(creature, sprite);
 		creature.onPositionChange((pos) => {
 			this.updatePosition(creature, sprite, pos);
+		});
+		creature.onRequestFocus(() => {
+			this.centerSprite(sprite);
 		});
 		creature.onDemise(() => {
 			this.viewport.removeChild(sprite);
